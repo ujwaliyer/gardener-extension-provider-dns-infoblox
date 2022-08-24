@@ -21,6 +21,7 @@ type dnsClient struct {
 	client ibclient.IBConnector
 }
 
+// added constant for DNS record types
 const (
 	type_A     = "A"
 	type_CNAME = "CNAME"
@@ -29,7 +30,7 @@ const (
 )
 
 // NewDNSClient creates a new dns client with a cloudflare api token.
-func NewDNSClient(ctx context.Context, client ibclient.IBConnector) (DNSClient, error) {
+func NewDNSClient(client ibclient.IBConnector) (DNSClient, error) {
 
 	return &dnsClient{
 		IBConnector: client,
@@ -133,17 +134,48 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zoneID, name, recordTyp
 // 	return nil
 // }
 
-func (c *dnsClient) createRecord(type string) error {
+// create DNS record for the Infoblox DDI setup
+func (c *dnsClient) createRecord(name string, zone, ip_addr string, ttl int64, record_type string) error {
+
+	type record struct{}
+
+	// initialize empty DNS recordd as per record type
 	switch record_type {
 	case type_A:
-		record := ibclient.NewEmptyRecordA()
+		r, err := ibclient.NewEmptyRecordA()
+		r.Zone = zone
+		r.Name = name
+		r.Ipv4Addr = ip_addr
+		r.Ttl = int(ttl)
+		record = (*ibclient.RecordA)(r)
 	case type_CNAME:
-		record := ibclient.NewEmptyRecordCNAME()
+		r, err := ibclient.NewEmptyRecordCNAME()
+		r.Zone = zone
+		r.Name = name
+		r.Ipv4Addr = ip_addr
+		r.Ttl = int(ttl)
+		record = (*ibclient.RecordCNAME)(r)
 	case type_AAAA:
-		record := ibclient.NewEmptyRecordAAAA()
-	case type_TXT
-		record := ibclient.NewEmptyRecordTXT()
+		r, err := ibclient.NewEmptyRecordAAAA()
+		r.Zone = zone
+		r.Name = name
+		r.Ipv4Addr = ip_addr
+		r.Ttl = int(ttl)
+		record = (*ibclient.RecordAAAA)(r)
+	case type_TXT:
+		r, err := ibclient.NewEmptyRecordTXT()
+		r.Zone = zone
+		r.Name = name
+		r.Ipv4Addr = ip_addr
+		r.Ttl = int(ttl)
+		record = (*ibclient.RecordTXT)(r)
 	}
+
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Unable to set dns record for %s : %w", name, err)
+	// }
+
+	return nil
 }
 
 func (c *dnsClient) deleteRecord(ctx context.Context, zoneID, recordID, name, rrdata string) error {
@@ -166,12 +198,12 @@ func (c *dnsClient) getZoneID(ctx context.Context, name string) (string, error) 
 	return zoneID, nil
 }
 
-func (c *dnsClient) getRecordSet(ctx context.Context, name, zoneID string) (map[string]cloudflare.DNSRecord, error) {
+func (c *dnsClient) getRecordSet(ctx context.Context, name, zoneID string) map[string]cloudflare.DNSror {
 	// results, err := c.api.DNSRecords(ctx, zoneID, cloudflare.DNSRecord{
 	// 	Name: name,
 	// })
-	
-	results, err := c.client.
+
+	//results, err := c.client.
 
 	if err != nil {
 		return nil, err

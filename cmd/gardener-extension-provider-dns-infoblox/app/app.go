@@ -33,7 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
-const name = "dns-provider-cloudflare"
+const name = "dns-provider-infoblox"
 
 // NewControllerManagerCommand creates a new command for running a GCP provider controller.
 func NewControllerManagerCommand(ctx context.Context) *cobra.Command {

@@ -17,7 +17,7 @@ package main
 import (
 	"os"
 
-	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/cmd/gardener-extension-provider-dns-cloudflare/app"
+	"github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/cmd/gardener-extension-provider-dns-infoblox/app"
 
 	"github.com/gardener/gardener/pkg/logger"
 	runtimelog "sigs.k8s.io/controller-runtime/pkg/log"

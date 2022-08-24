@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	cloudflare "github.com/cloudflare/cloudflare-go"
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
+	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
+	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/vendor/github.com/cloudflare/cloudflare-go"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
-
-const API_TOKEN_FIELD = "apiToken"
 
 type DNSClient interface {
 	GetManagedZones(ctx context.Context) (map[string]string, error)
@@ -19,18 +18,21 @@ type DNSClient interface {
 }
 
 type dnsClient struct {
-	api *cloudflare.API
+	client ibclient.IBConnector
 }
 
+const (
+	type_A     = "A"
+	type_CNAME = "CNAME"
+	type_AAAA  = "AAAA"
+	type_TXT   = "TXT"
+)
+
 // NewDNSClient creates a new dns client with a cloudflare api token.
-func NewDNSClient(ctx context.Context, apiToken string) (DNSClient, error) {
-	api, err := cloudflare.NewWithAPIToken(apiToken)
-	if err != nil {
-		return nil, err
-	}
+func NewDNSClient(ctx context.Context, client ibclient.IBConnector) (DNSClient, error) {
 
 	return &dnsClient{
-		api: api,
+		IBConnector: client,
 	}, nil
 }
 
@@ -47,6 +49,8 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 	}
 	return NewDNSClient(ctx, string(apiToken))
 }
+
+// notes:
 
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
@@ -113,20 +117,33 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zoneID, name, recordTyp
 	return nil
 }
 
-func (c *dnsClient) createRecord(ctx context.Context, zoneID, name, recordType, rrdata string, ttl int64) error {
-	res, err := c.api.CreateDNSRecord(ctx, zoneID, cloudflare.DNSRecord{
-		Name:    name,
-		Type:    recordType,
-		TTL:     int(ttl),
-		Content: rrdata,
-	})
-	if err != nil {
-		return fmt.Errorf("Unable to set dns record for %s to %s: %w", name, rrdata, err)
+// func (c *dnsClient) createRecord(ctx context.Context, zoneID, name, recordType, rrdata string, ttl int64) error {
+// 	res, err := c.api.CreateDNSRecord(ctx, zoneID, cloudflare.DNSRecord{
+// 		Name:    name,
+// 		Type:    recordType,
+// 		TTL:     int(ttl),
+// 		Content: rrdata,
+// 	})
+// 	if err != nil {
+// 		return fmt.Errorf("Unable to set dns record for %s to %s: %w", name, rrdata, err)
+// 	}
+// 	if !res.Success {
+// 		return fmt.Errorf("Unable to set dns record for %s to %s: %#v", name, rrdata, res.Errors)
+// 	}
+// 	return nil
+// }
+
+func (c *dnsClient) createRecord(type string) error {
+	switch record_type {
+	case type_A:
+		record := ibclient.NewEmptyRecordA()
+	case type_CNAME:
+		record := ibclient.NewEmptyRecordCNAME()
+	case type_AAAA:
+		record := ibclient.NewEmptyRecordAAAA()
+	case type_TXT
+		record := ibclient.NewEmptyRecordTXT()
 	}
-	if !res.Success {
-		return fmt.Errorf("Unable to set dns record for %s to %s: %#v", name, rrdata, res.Errors)
-	}
-	return nil
 }
 
 func (c *dnsClient) deleteRecord(ctx context.Context, zoneID, recordID, name, rrdata string) error {
@@ -149,11 +166,13 @@ func (c *dnsClient) getZoneID(ctx context.Context, name string) (string, error) 
 	return zoneID, nil
 }
 
-// getRecordSets returns a map of rrdata to dns record for the given name.
 func (c *dnsClient) getRecordSet(ctx context.Context, name, zoneID string) (map[string]cloudflare.DNSRecord, error) {
-	results, err := c.api.DNSRecords(ctx, zoneID, cloudflare.DNSRecord{
-		Name: name,
-	})
+	// results, err := c.api.DNSRecords(ctx, zoneID, cloudflare.DNSRecord{
+	// 	Name: name,
+	// })
+	
+	results, err := c.client.
+
 	if err != nil {
 		return nil, err
 	}

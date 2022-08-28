@@ -21,7 +21,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
-const DNSType = "cloudflare-dns"
+const DNSType = "infoblox-dns"
 
 var (
 	// DefaultAddOptions are the default AddOptions for AddToManager.

@@ -5,11 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
-	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/vendor/github.com/cloudflare/cloudflare-go"
-	corev1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type DNSClient interface {
@@ -46,6 +42,15 @@ type InfobloxConfig struct {
 	ProxyURL        *string `json:"proxyUrl,omitempty"`
 }
 
+type recordConfig struct {
+	record_type string
+	view        string
+	name        string
+	ip_addr     string
+	ttl         uint32
+	usettl      bool
+}
+
 // NewDNSClient creates a new dns client based on the Infoblox config provided
 func NewDNSClient(record_type string) (DNSClient, error) {
 
@@ -79,22 +84,6 @@ func NewDNSClient(record_type string) (DNSClient, error) {
 		client: client,
 	}, nil
 }
-
-// NewDNSClientFromSecretRef creates a bew dns client from a secret containing an apiToken.
-func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef corev1.SecretReference) (DNSClient, error) {
-	secret, err := extensionscontroller.GetSecretByReference(ctx, c, &secretRef)
-	if err != nil {
-		return nil, err
-	}
-
-	apiToken, ok := secret.Data[API_TOKEN_FIELD]
-	if !ok {
-		return nil, fmt.Errorf("no api token defined")
-	}
-	return NewDNSClient(ctx, string(apiToken))
-}
-
-// notes:
 
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
@@ -161,64 +150,12 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zoneID, name, recordTyp
 	return nil
 }
 
-// func (c *dnsClient) createRecord(ctx context.Context, zoneID, name, recordType, rrdata string, ttl int64) error {
-// 	res, err := c.api.CreateDNSRecord(ctx, zoneID, cloudflare.DNSRecord{
-// 		Name:    name,
-// 		Type:    recordType,
-// 		TTL:     int(ttl),
-// 		Content: rrdata,
-// 	})
-// 	if err != nil {
-// 		return fmt.Errorf("Unable to set dns record for %s to %s: %w", name, rrdata, err)
-// 	}
-// 	if !res.Success {
-// 		return fmt.Errorf("Unable to set dns record for %s to %s: %#v", name, rrdata, res.Errors)
-// 	}
-// 	return nil
-// }
-
 // create DNS record for the Infoblox DDI setup
-func (c *dnsClient) createRecord(name string, zone, ip_addr string, ttl int64, record_type string) error {
+func (c *dnsClient) createRecord(name string, zone, ip_addr string, ttl int64, record_type string) (ibclient.IBObject, error) {
 
-	type record struct{}
+	// create a DNS record based on record type
+	obj_dnsrecord, err := c.CreateObject()
 
-	// initialize empty DNS recordd as per record type
-	switch record_type {
-	case type_A:
-		r, err := ibclient.NewEmptyRecordA()
-		r.Zone = zone
-		r.Name = name
-		r.Ipv4Addr = ip_addr
-		r.Ttl = int(ttl)
-		record = (*ibclient.RecordA)(r)
-	case type_CNAME:
-		r, err := ibclient.NewEmptyRecordCNAME()
-		r.Zone = zone
-		r.Name = name
-		r.Ipv4Addr = ip_addr
-		r.Ttl = int(ttl)
-		record = (*ibclient.RecordCNAME)(r)
-	case type_AAAA:
-		r, err := ibclient.NewEmptyRecordAAAA()
-		r.Zone = zone
-		r.Name = name
-		r.Ipv4Addr = ip_addr
-		r.Ttl = int(ttl)
-		record = (*ibclient.RecordAAAA)(r)
-	case type_TXT:
-		r, err := ibclient.NewEmptyRecordTXT()
-		r.Zone = zone
-		r.Name = name
-		r.Ipv4Addr = ip_addr
-		r.Ttl = int(ttl)
-		record = (*ibclient.RecordTXT)(r)
-	}
-
-	// if err != nil {
-	// 	return nil, fmt.Errorf("Unable to set dns record for %s : %w", name, err)
-	// }
-
-	return nil
 }
 
 func (c *dnsClient) deleteRecord(ctx context.Context, zoneID, recordID, name, rrdata string) error {

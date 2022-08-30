@@ -3,6 +3,7 @@ package dnsclient
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
@@ -27,13 +28,55 @@ const (
 	type_CNAME = "CNAME"
 	type_AAAA  = "AAAA"
 	type_TXT   = "TXT"
+
+	username = "username"
+	password = "password"
 )
 
-// NewDNSClient creates a new dns client with a cloudflare api token.
-func NewDNSClient(client ibclient.IBConnector) (DNSClient, error) {
+type InfobloxConfig struct {
+	Host            *string `json:"host,omitempty"`
+	Port            *int    `json:"port,omitempty"`
+	SSLVerify       *bool   `json:"sslVerify,omitempty"`
+	Version         *string `json:"version,omitempty"`
+	View            *string `json:"view,omitempty"`
+	PoolConnections *int    `json:"httpPoolConnections,omitempty"`
+	RequestTimeout  *int    `json:"httpRequestTimeout,omitempty"`
+	CaCert          *string `json:"caCert,omitempty"`
+	MaxResults      int     `json:"maxResults,omitempty"`
+	ProxyURL        *string `json:"proxyUrl,omitempty"`
+}
+
+// NewDNSClient creates a new dns client based on the Infoblox config provided
+func NewDNSClient(record_type string) (DNSClient, error) {
+
+	infobloxConfig := &InfobloxConfig{}
+
+	// define hostConfig
+	hostConfig := ibclient.HostConfig{
+		host:     *infobloxConfig.Host,
+		Port:     *infobloxConfig.Port,
+		Version:  *infobloxConfig.Version,
+		Username: username,
+		Password: password,
+	}
+
+	verify := "true"
+	if infobloxConfig.SSLVerify != nil {
+		verify = strconv.FormatBool(*infobloxConfig.SSLVerify)
+	}
+
+	// define transportConfig
+	transportConfig := ibclient.IBConnector(verify, infobloxConfig.RequestTimeout, infobloxConfig.PoolConnections)
+
+	var requestBuilder ibclient.HttpRequestBuilder = &ibclient.WapiRequestBuilder{}
+
+	client, err := ibclient.NewConnector(hostConfig, transportConfig, requestBuilder, &ibclient.WapiHttpRequestor)
+	if err != nil {
+		fmt.Errorf(err)
+	}
 
 	return &dnsClient{
-		IBConnector: client,
+		client: client,
 	}, nil
 }
 

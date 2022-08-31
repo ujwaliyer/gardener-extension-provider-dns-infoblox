@@ -18,17 +18,6 @@ type dnsClient struct {
 	client ibclient.IBConnector
 }
 
-// added constant for DNS record types
-const (
-	type_A     = "A"
-	type_CNAME = "CNAME"
-	type_AAAA  = "AAAA"
-	type_TXT   = "TXT"
-
-	username = "username"
-	password = "password"
-)
-
 type InfobloxConfig struct {
 	Host            *string `json:"host,omitempty"`
 	Port            *int    `json:"port,omitempty"`
@@ -52,7 +41,7 @@ type recordConfig struct {
 }
 
 // NewDNSClient creates a new dns client based on the Infoblox config provided
-func NewDNSClient(record_type string) (DNSClient, error) {
+func NewDNSClient(host string, Port int, Version uint, username string, password string) (DNSClient, error) {
 
 	infobloxConfig := &InfobloxConfig{}
 
@@ -71,7 +60,7 @@ func NewDNSClient(record_type string) (DNSClient, error) {
 	}
 
 	// define transportConfig
-	transportConfig := ibclient.IBConnector(verify, infobloxConfig.RequestTimeout, infobloxConfig.PoolConnections)
+	transportConfig := ibclient.NewTransportConfig(verify, infobloxConfig.RequestTimeout, infobloxConfig.PoolConnections)
 
 	var requestBuilder ibclient.HttpRequestBuilder = &ibclient.WapiRequestBuilder{}
 
@@ -151,9 +140,11 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zoneID, name, recordTyp
 }
 
 // create DNS record for the Infoblox DDI setup
-func (c *dnsClient) createRecord(name string, zone, ip_addr string, ttl int64, record_type string) (ibclient.IBObject, error) {
+func (c *dnsClient) createRecord(name string, zone, ip_addr string, ttl int64, record_type string) ibclient.IBObjectManager {
 
 	// create a DNS record based on record type
+
+	// create a DNS object
 	obj_dnsrecord, err := c.CreateObject()
 
 }

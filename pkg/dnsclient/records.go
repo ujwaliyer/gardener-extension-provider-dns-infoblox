@@ -1,6 +1,8 @@
 package dnsclient
 
 import (
+	"strconv"
+
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
 )
 
@@ -92,3 +94,10 @@ var _ Record = (*RecordCNAME)(nil)
 var _ Record = (*RecordTXT)(nil)
 
 type RecordNS ibclient.RecordNS
+
+func EnsureQuotedText(v string) string {
+	if _, err := strconv.Unquote(v); err != nil {
+		v = strconv.Quote(v)
+	}
+	return v
+}

@@ -8,6 +8,13 @@ import (
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
 )
 
+const (
+	type_A     = "A"
+	type_CNAME = "CNAME"
+	type_AAAA  = "AAAA"
+	type_TXT   = "TXT"
+)
+
 type DNSClient interface {
 	GetManagedZones(ctx context.Context) (map[string]string, error)
 	CreateOrUpdateRecordSet(ctx context.Context, managedZone, name, recordType string, rrdatas []string, ttl int64) error
@@ -31,17 +38,8 @@ type InfobloxConfig struct {
 	ProxyURL        *string `json:"proxyUrl,omitempty"`
 }
 
-type recordConfig struct {
-	record_type string
-	view        string
-	name        string
-	ip_addr     string
-	ttl         uint32
-	usettl      bool
-}
-
 // NewDNSClient creates a new dns client based on the Infoblox config provided
-func NewDNSClient(host string, Port int, Version uint, username string, password string) (DNSClient, error) {
+func NewDNSClient(username string, password string) (DNSClient, error) {
 
 	infobloxConfig := &InfobloxConfig{}
 
@@ -140,7 +138,7 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zoneID, name, recordTyp
 }
 
 // create DNS record for the Infoblox DDI setup
-func (c *dnsClient) createRecord(name string, zone, ip_addr string, ttl int64, record_type string) ibclient.IBObjectManager {
+func (c *dnsClient) createRecord(name string, zone, ip_addr string, ttl int64, record_type string) Record {
 
 	// create a DNS record based on record type
 

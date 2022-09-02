@@ -15,6 +15,20 @@ const (
 	type_TXT   = "TXT"
 )
 
+type Record interface{}
+
+type RecordA ibclient.RecordA
+type RecordAAAA ibclient.RecordAAAA
+type RecordCNAME ibclient.RecordCNAME
+type RecordTXT ibclient.RecordTXT
+
+var _ Record = (*RecordA)(nil)
+var _ Record = (*RecordAAAA)(nil)
+var _ Record = (*RecordCNAME)(nil)
+var _ Record = (*RecordTXT)(nil)
+
+type RecordNS ibclient.RecordNS
+
 type DNSClient interface {
 	GetManagedZones(ctx context.Context) (map[string]string, error)
 	CreateOrUpdateRecordSet(ctx context.Context, managedZone, name, recordType string, rrdatas []string, ttl int64) error
@@ -138,12 +152,36 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zoneID, name, recordTyp
 }
 
 // create DNS record for the Infoblox DDI setup
-func (c *dnsClient) createRecord(name string, zone, ip_addr string, ttl int64, record_type string) Record {
+func (c *dnsClient) createRecord(name string, view string, zone, ip_addr string, ttl int64, record_type string) Record {
 
-	// create a DNS record based on record type
+	dns_objmgr, err := ibclient.NewObjectManager(c, "VMWare", "")
 
-	// create a DNS object
-	obj_dnsrecord, err := c.CreateObject()
+	var dns_record ibclient.IBObject
+
+	switch record_type {
+	case type_A:
+		dns_record := dns_objmgr.CreateARecord()
+		dns_record.View = view
+		dns_record.Name = name
+		dns_record.IpV4Addr = ip_addr
+	case type_AAAA:
+		dns_record := dns_objmgr.CreateAAAARecord()
+		dns_record.View = view
+		dns_record.Name = name
+		dns_record.IpV6Addr = ip_addr
+	case type_CNAME:
+		dns_record := dns_objmgr.CreateCNAMERecord()
+		dns_record.View = view
+		dns_record.Name = name
+		dns_record.IpV4Addr = ip_addr
+	case type_TXT:
+
+	}
+	if dns_record != nil {
+		dns_record.Ttl = ttl
+	}
+
+	return dns_record
 
 }
 

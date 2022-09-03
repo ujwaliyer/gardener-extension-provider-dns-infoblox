@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/dnsclient"
+	"github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient"
 
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	"github.com/gardener/gardener/extensions/pkg/controller/common"
@@ -48,7 +48,7 @@ type actuator struct {
 // NewActuator creates a new dnsrecord.Actuator.
 func NewActuator(logger logr.Logger) dnsrecord.Actuator {
 	return &actuator{
-		logger: logger.WithName("cloudflare-dnsrecord-actuator"),
+		logger: logger.WithName("infoblox-dnsrecord-actuator"),
 	}
 }
 

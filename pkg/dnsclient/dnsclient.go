@@ -34,7 +34,7 @@ type RecordNS ibclient.RecordNS
 
 type DNSClient interface {
 	GetManagedZones(ctx context.Context) (map[string]string, error)
-	CreateOrUpdateRecordSet(ctx context.Context, managedZone, name, recordType string, rrdatas []string, ttl int64) error
+	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error
 	DeleteRecordSet(ctx context.Context, managedZone, name, recordType string) error
 }
 
@@ -79,13 +79,13 @@ func NewDNSClient(username string, password string) (DNSClient, error) {
 
 	var requestBuilder ibclient.HttpRequestBuilder = &ibclient.WapiRequestBuilder{}
 
-	client, err := ibclient.NewConnector(hostConfig, transportConfig, requestBuilder, &ibclient.WapiHttpRequestor)
+	dns_client, err := ibclient.NewConnector(hostConfig, transportConfig, requestBuilder, &ibclient.WapiHttpRequestor)
 	if err != nil {
 		fmt.Errorf(err)
 	}
 
 	return &dnsClient{
-		client: client,
+		client: dns_client,
 	}, nil
 }
 
@@ -108,26 +108,26 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, err
 
 // CreateOrUpdateRecordSet creates or updates the resource recordset with the given name, record type, rrdatas, and ttl
 // in the managed zone with the given name or ID.
-func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, zoneID, name, recordType string, rrdatas []string, ttl int64) error {
-	records, err := c.getRecordSet(ctx, name, zoneID)
+func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error {
+	records, err := c.getRecordSet(name, zone)
 	if err != nil {
 		return err
 	}
-	for _, rrdata := range rrdatas {
-		if _, ok := records[rrdata]; ok {
+	for _, ip_addr := range ip_addrs {
+		if _, ok := records[ip_addr]; ok {
 			// entry already exists
-			delete(records, rrdata)
+			delete(records, ip_addr)
 			continue
 		}
-		if err := c.createRecord(ctx, zoneID, name, recordType, rrdata, ttl); err != nil {
+		if err := c.createRecord(name, view, zone, ip_addr, ttl, record_type); err != nil {
 			return err
 		}
-		delete(records, rrdata)
+		delete(records, ip_addr)
 	}
 
 	// delete undefined data
 	for _, record := range records {
-		if err := c.deleteRecord(ctx, zoneID, record.ID, name, record.Content); err != nil {
+		if err := c.deleteRecord(ctx, zone, record.ID, name, record.name); err != nil {
 			return err
 		}
 	}
@@ -136,8 +136,8 @@ func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, zoneID, name, r
 
 // DeleteRecordSet deletes the resource recordset with the given name and record type
 // in the managed zone with the given name or ID.
-func (c *dnsClient) DeleteRecordSet(ctx context.Context, zoneID, name, recordType string) error {
-	records, err := c.getRecordSet(ctx, name, zoneID)
+func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, recordType string) error {
+	records, err := c.getRecordSet(name, zone)
 	if err != nil {
 		return err
 	}
@@ -146,7 +146,7 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zoneID, name, recordTyp
 		if record.Type != recordType {
 			continue
 		}
-		if err := c.deleteRecord(ctx, zoneID, record.ID, name, record.Content); err != nil {
+		if err := c.deleteRecord(ctx, zone, record.ID, name, record.name); err != nil {
 			return err
 		}
 	}
@@ -155,7 +155,7 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zoneID, name, recordTyp
 }
 
 // create DNS record for the Infoblox DDI setup
-func (c *dnsClient) newRecord(name, view, zone, ip_addr string, ttl int64, record_type string) Record {
+func (c *dnsClient) createRecord(name, view, zone, ip_addr string, ttl int64, record_type string) Record {
 
 	dns_objmgr, err := ibclient.NewObjectManager(c, "VMWare", "")
 
@@ -214,7 +214,7 @@ func (c *dnsClient) getZoneID(ctx context.Context, name string) (string, error) 
 	return zoneID, nil
 }
 
-func (c *dnsClient) getRecordSet(name, zoneID string) (map[string]Record, error) {
+func (c *dnsClient) getRecordSet(name, zone string) (map[string]Record, error) {
 
 	results, err := c.client.GetObject()
 

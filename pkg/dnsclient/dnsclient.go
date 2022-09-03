@@ -15,17 +15,20 @@ const (
 	type_TXT   = "TXT"
 )
 
-type Record interface{}
+// type Record interface{}
+type Record ibclient.IBObject
+
+var RecordSet []Record
 
 type RecordA ibclient.RecordA
 type RecordAAAA ibclient.RecordAAAA
 type RecordCNAME ibclient.RecordCNAME
 type RecordTXT ibclient.RecordTXT
 
-var _ Record = (*RecordA)(nil)
-var _ Record = (*RecordAAAA)(nil)
-var _ Record = (*RecordCNAME)(nil)
-var _ Record = (*RecordTXT)(nil)
+// var _ Record = (*RecordA)(nil)
+// var _ Record = (*RecordAAAA)(nil)
+// var _ Record = (*RecordCNAME)(nil)
+// var _ Record = (*RecordTXT)(nil)
 
 type RecordNS ibclient.RecordNS
 
@@ -152,45 +155,49 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zoneID, name, recordTyp
 }
 
 // create DNS record for the Infoblox DDI setup
-func (c *dnsClient) createRecord(name string, view string, zone, ip_addr string, ttl int64, record_type string) Record {
+func (c *dnsClient) newRecord(name, view, zone, ip_addr string, ttl int64, record_type string) Record {
 
 	dns_objmgr, err := ibclient.NewObjectManager(c, "VMWare", "")
 
-	var dns_record ibclient.IBObject
+	var record ibclient.IBObject
 
 	switch record_type {
 	case type_A:
-		dns_record := dns_objmgr.CreateARecord()
-		dns_record.View = view
-		dns_record.Name = name
-		dns_record.IpV4Addr = ip_addr
+		record := dns_objmgr.CreateARecord()
+		record.View = view
+		record.Name = name
+		record.IpV4Addr = ip_addr
+		record.Ttl = ttl
 	case type_AAAA:
-		dns_record := dns_objmgr.CreateAAAARecord()
-		dns_record.View = view
-		dns_record.Name = name
-		dns_record.IpV6Addr = ip_addr
+		record := dns_objmgr.CreateAAAARecord()
+		record.View = view
+		record.Name = name
+		record.IpV6Addr = ip_addr
+		record.Ttl = ttl
 	case type_CNAME:
-		dns_record := dns_objmgr.CreateCNAMERecord()
-		dns_record.View = view
-		dns_record.Name = name
-		dns_record.IpV4Addr = ip_addr
+		record := dns_objmgr.CreateCNAMERecord()
+		record.View = view
+		record.Name = name
+		record.Canonical = ip_addr
+		record.Ttl = ttl
 	case type_TXT:
 
 	}
-	if dns_record != nil {
-		dns_record.Ttl = ttl
-	}
+
+	dns_record := ibclient.CreateObject(record.(ibclient.IBObject))
 
 	return dns_record
 
 }
 
-func (c *dnsClient) deleteRecord(ctx context.Context, zoneID, recordID, name, rrdata string) error {
-	err := c.api.DeleteDNSRecord(ctx, zoneID, recordID)
+func (c *dnsClient) deleteRecord(record Record, zone string) error {
+
+	_, err := c.client.DeleteObject(record.Ref)
+
 	if err != nil {
-		return fmt.Errorf("Unable to set dns record for %s to %s: %w", name, rrdata, err)
+		return fmt.Errorf(err)
 	}
-	return nil
+
 }
 
 func (c *dnsClient) getZoneID(ctx context.Context, name string) (string, error) {
@@ -205,12 +212,7 @@ func (c *dnsClient) getZoneID(ctx context.Context, name string) (string, error) 
 	return zoneID, nil
 }
 
-func (c *dnsClient) getRecordSet(ctx context.Context, name, zoneID string) map[string]cloudflare.DNSror {
-	// results, err := c.api.DNSRecords(ctx, zoneID, cloudflare.DNSRecord{
-	// 	Name: name,
-	// })
-
-	//results, err := c.client.
+func (c *dnsClient) getRecordSet(name, zoneID string) map[string]Record {
 
 	if err != nil {
 		return nil, err
@@ -218,7 +220,7 @@ func (c *dnsClient) getRecordSet(ctx context.Context, name, zoneID string) map[s
 	if len(results) == 0 {
 		return nil, nil
 	}
-	records := make(map[string]cloudflare.DNSRecord, len(results))
+	records := make(map[string]Record, len(results))
 	for _, record := range results {
 		records[record.Content] = record
 	}

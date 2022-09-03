@@ -198,6 +198,8 @@ func (c *dnsClient) deleteRecord(record Record, zone string) error {
 		return fmt.Errorf(err)
 	}
 
+	return nil
+
 }
 
 func (c *dnsClient) getZoneID(ctx context.Context, name string) (string, error) {
@@ -212,7 +214,9 @@ func (c *dnsClient) getZoneID(ctx context.Context, name string) (string, error) 
 	return zoneID, nil
 }
 
-func (c *dnsClient) getRecordSet(name, zoneID string) map[string]Record {
+func (c *dnsClient) getRecordSet(name, zoneID string) (map[string]Record, error) {
+
+	results, err := c.client.GetObject()
 
 	if err != nil {
 		return nil, err
@@ -222,7 +226,7 @@ func (c *dnsClient) getRecordSet(name, zoneID string) map[string]Record {
 	}
 	records := make(map[string]Record, len(results))
 	for _, record := range results {
-		records[record.Content] = record
+		records[record.name] = record
 	}
 	return records, nil
 }

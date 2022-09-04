@@ -109,7 +109,7 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, err
 // CreateOrUpdateRecordSet creates or updates the resource recordset with the given name, record type, rrdatas, and ttl
 // in the managed zone with the given name or ID.
 func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error {
-	records, err := c.getRecordSet(name, zone)
+	records, err := c.getRecordSet(name, record_type, zone)
 	if err != nil {
 		return err
 	}
@@ -136,14 +136,14 @@ func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, nam
 
 // DeleteRecordSet deletes the resource recordset with the given name and record type
 // in the managed zone with the given name or ID.
-func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, recordType string) error {
-	records, err := c.getRecordSet(name, zone)
+func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, record_type string) error {
+	records, err := c.getRecordSet(name, record_type, zone)
 	if err != nil {
 		return err
 	}
 
 	for _, record := range records {
-		if record.Type != recordType {
+		if record.Type != record_type {
 			continue
 		}
 		if err := c.deleteRecord(ctx, zone, record.ID, name, record.name); err != nil {
@@ -155,7 +155,7 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, recordType 
 }
 
 // create DNS record for the Infoblox DDI setup
-func (c *dnsClient) createRecord(name, view, zone, ip_addr string, ttl int64, record_type string) Record {
+func (c *dnsClient) createRecord(name string, view string, zone string, ip_addr string, ttl int64, record_type string) Record {
 
 	dns_objmgr, err := ibclient.NewObjectManager(c, "VMWare", "")
 
@@ -163,19 +163,19 @@ func (c *dnsClient) createRecord(name, view, zone, ip_addr string, ttl int64, re
 
 	switch record_type {
 	case type_A:
-		record := dns_objmgr.CreateARecord()
+		record = dns_objmgr.CreateARecord()
 		record.View = view
 		record.Name = name
 		record.IpV4Addr = ip_addr
 		record.Ttl = ttl
 	case type_AAAA:
-		record := dns_objmgr.CreateAAAARecord()
+		record = dns_objmgr.CreateAAAARecord()
 		record.View = view
 		record.Name = name
 		record.IpV6Addr = ip_addr
 		record.Ttl = ttl
 	case type_CNAME:
-		record := dns_objmgr.CreateCNAMERecord()
+		record = dns_objmgr.CreateCNAMERecord()
 		record.View = view
 		record.Name = name
 		record.Canonical = ip_addr
@@ -214,9 +214,13 @@ func (c *dnsClient) getZoneID(ctx context.Context, name string) (string, error) 
 	return zoneID, nil
 }
 
-func (c *dnsClient) getRecordSet(name, zone string) (map[string]Record, error) {
+func (c *dnsClient) getRecordSet(name, record_type string, zone string) (map[string]Record, error) {
 
 	results, err := c.client.GetObject()
+
+	if record_type != type_TXT {
+		return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
+	}
 
 	if err != nil {
 		return nil, err

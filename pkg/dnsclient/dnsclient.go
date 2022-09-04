@@ -1,8 +1,11 @@
 package dnsclient
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"strconv"
 
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
@@ -91,19 +94,46 @@ func NewDNSClient(username string, password string) (DNSClient, error) {
 
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
-func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, error) {
-	zones := make(map[string]string)
-
-	result, err := c.api.ListZones(ctx)
+func (c *dnsClient) GetManagedZones(ctx context.Context, zone string) (map[string]string, error) {
+	
+	var raw []ibclient.ZoneAuth
+	obj := ibclient.NewZoneAuth(ibclient.ZoneAuth{})
+	err := c.client.GetObject(obj, "", &ibclient.QueryParams{}, &raw)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, z := range result {
-		zones[z.Name] = z.ID
-	}
+	blockedZones := h.config.Options.AdvancedOptions.GetBlockedZones()
+	zones := provider.DNSHostedZones{}
+	for _, z := range raw {
+		if blockedZones.Contains(z.Ref) {
+			h.config.Logger.Infof("ignoring blocked zone id: %s", z.Ref)
+			continue
+		}
 
+		h.config.Metrics.AddZoneRequests(z.Ref, provider.M_LISTRECORDS, 1)
+		var resN []RecordNS
+		objN := ibclient.NewRecordNS(
+			ibclient.RecordNS{
+				Zone: z.Fqdn,
+				View: *h.infobloxConfig.View,
+			},
+		)
+		err = c.GetObject(objN, "", &ibclient.QueryParams{}, &resN)
+		if err != nil {
+			return nil, fmt.Errorf("could not fetch NS records from zone '%s': %s", z.Fqdn, err)
+		}
+		forwarded := []string{}
+		for _, res := range resN {
+			if res.Name != z.Fqdn {
+				forwarded = append(forwarded, res.Name)
+			}
+		}
+		hostedZone := provider.NewDNSHostedZone(h.ProviderType(), z.Ref, dns.NormalizeHostname(z.Fqdn), z.Fqdn, forwarded, false)
+		zones = append(zones, hostedZone)
+	}
 	return zones, nil
+
 }
 
 // CreateOrUpdateRecordSet creates or updates the resource recordset with the given name, record type, rrdatas, and ttl
@@ -222,15 +252,45 @@ func (c *dnsClient) getRecordSet(name, record_type string, zone string) (map[str
 		return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
 	}
 
+	if rtype != dns.RS_TXT {
+		return nil, fmt.Errorf("record type %s not supported for GetRecord", rtype)
+	}
+
+	execRequest := func(forceProxy bool) ([]byte, error) {
+		rt := ibclient.NewRecordTXT(ibclient.RecordTXT{})
+		urlStr := c.RequestBuilder.BuildUrl(ibclient.GET, rt.ObjectType(), "", rt.ReturnFields(), &ibclient.QueryParams{})
+		urlStr += "&name=" + dnsName
+		if forceProxy {
+			urlStr += "&_proxy_search=GM"
+		}
+		req, err := http.NewRequest("GET", urlStr, new(bytes.Buffer))
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Content-Type", "application/json")
+		req.SetBasicAuth(c.HostConfig.Username, c.HostConfig.Password)
+
+		return c.Requestor.SendRequest(req)
+	}
+
+	resp, err := execRequest(false)
+	if err != nil {
+		// Forcing the request to redirect to Grid Master by making forcedProxy=true
+		resp, err = execRequest(true)
+	}
 	if err != nil {
 		return nil, err
 	}
-	if len(results) == 0 {
-		return nil, nil
+
+	rs := []RecordTXT{}
+	err = json.Unmarshal(resp, &rs)
+	if err != nil {
+		return nil, err
 	}
-	records := make(map[string]Record, len(results))
-	for _, record := range results {
-		records[record.name] = record
+
+	rs2 := RecordSet[]
+	for _, r := range rs {
+		rs2 = append(rs2, r.Copy())
 	}
-	return records, nil
+	return rs2, nil
 }

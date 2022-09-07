@@ -94,7 +94,7 @@ func NewDNSClient(username string, password string) (DNSClient, error) {
 
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
-func (c *dnsClient) GetManagedZones(ctx context.Context, zone string) (map[string]string, error) {
+func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone string) (map[string]string, error) {
 	
 	var raw []ibclient.ZoneAuth
 	obj := ibclient.NewZoneAuth(ibclient.ZoneAuth{})
@@ -107,16 +107,15 @@ func (c *dnsClient) GetManagedZones(ctx context.Context, zone string) (map[strin
 	zones := provider.DNSHostedZones{}
 	for _, z := range raw {
 		if blockedZones.Contains(z.Ref) {
-			h.config.Logger.Infof("ignoring blocked zone id: %s", z.Ref)
+			fmt.Printf("ignoring blocked zone id: %s", z.Ref)
 			continue
 		}
 
-		h.config.Metrics.AddZoneRequests(z.Ref, provider.M_LISTRECORDS, 1)
 		var resN []RecordNS
 		objN := ibclient.NewRecordNS(
 			ibclient.RecordNS{
-				Zone: z.Fqdn,
-				View: *h.infobloxConfig.View,
+				Zone: z.name,
+				View: *c.infobloxConfig.View,
 			},
 		)
 		err = c.GetObject(objN, "", &ibclient.QueryParams{}, &resN)
@@ -125,11 +124,12 @@ func (c *dnsClient) GetManagedZones(ctx context.Context, zone string) (map[strin
 		}
 		forwarded := []string{}
 		for _, res := range resN {
-			if res.Name != z.Fqdn {
+			if res.Name != z.name {
 				forwarded = append(forwarded, res.Name)
 			}
 		}
-		hostedZone := provider.NewDNSHostedZone(h.ProviderType(), z.Ref, dns.NormalizeHostname(z.Fqdn), z.Fqdn, forwarded, false)
+		hostedZone := ibclient.IBObject
+		// hostedZone := provider.NewDNSHostedZone(h.ProviderType(), z.Ref, dns.NormalizeHostname(z.Fqdn), z.Fqdn, forwarded, false)
 		zones = append(zones, hostedZone)
 	}
 	return zones, nil

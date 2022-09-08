@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
+	"github.com/gardener/controller-manager-library/pkg/utils"
 )
 
 const (
@@ -58,6 +59,14 @@ type InfobloxConfig struct {
 	ProxyURL        *string `json:"proxyUrl,omitempty"`
 }
 
+type DefaultDNSHostedZone struct {
+	zoneid    dns.ZoneID // qualified zone id
+	domain    string     // base domain for zone
+	forwarded []string   // forwarded sub domains
+	key       string     // internal key used by provider (not used by this lib)
+	isPrivate bool       // indicates a private zone
+}
+
 // NewDNSClient creates a new dns client based on the Infoblox config provided
 func NewDNSClient(username string, password string) (DNSClient, error) {
 
@@ -103,8 +112,9 @@ func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone strin
 		return nil, err
 	}
 
-	blockedZones := h.config.Options.AdvancedOptions.GetBlockedZones()
-	zones := provider.DNSHostedZones{}
+	// need to work on this
+	blockedZones := utils.NewStringSet() // how to define this?
+	zones := provider.DNSHostedZones{} // need to replace this
 	for _, z := range raw {
 		if blockedZones.Contains(z.Ref) {
 			fmt.Printf("ignoring blocked zone id: %s", z.Ref)
@@ -114,7 +124,7 @@ func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone strin
 		var resN []RecordNS
 		objN := ibclient.NewRecordNS(
 			ibclient.RecordNS{
-				Zone: z.name,
+				Zone: z.Fqdn,
 				View: *c.infobloxConfig.View,
 			},
 		)

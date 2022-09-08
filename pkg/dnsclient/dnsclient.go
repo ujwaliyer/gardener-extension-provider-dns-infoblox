@@ -86,6 +86,21 @@ func NewDNSClient(username string, password string) (DNSClient, error) {
 		verify = strconv.FormatBool(*infobloxConfig.SSLVerify)
 	}
 
+	if infobloxConfig.CaCert != nil && verify == "true" {
+		tmpfile, err := ioutil.TempFile("", "cacert")
+		if err != nil {
+			return nil, fmt.Errorf("cannot create temporary file for cacert: %w", err)
+		}
+		defer os.Remove(tmpfile.Name())
+		if _, err := tmpfile.Write([]byte(*infobloxConfig.CaCert)); err != nil {
+			return nil, fmt.Errorf("cannot write temporary file for cacert: %w", err)
+		}
+		if err := tmpfile.Close(); err != nil {
+			return nil, fmt.Errorf("cannot close temporary file for cacert: %w", err)
+		}
+		verify = tmpfile.Name()
+	}
+
 	// define transportConfig
 	transportConfig := ibclient.NewTransportConfig(verify, infobloxConfig.RequestTimeout, infobloxConfig.PoolConnections)
 

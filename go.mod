@@ -1,4 +1,4 @@
-module github.com/schrodit/gardener-extension-provider-dns-cloudflare
+module github.com/ujwaliyer/gardener-extension-provider-dns-infoblox
 
 go 1.18
 

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 module github.com/ujwaliyer/gardener-extension-provider-dns-infoblox
+=======
+module github.com/schrodit/gardener-extension-provider-dns-cloudflare
+>>>>>>> main
 
 go 1.18
 

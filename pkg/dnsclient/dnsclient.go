@@ -156,7 +156,7 @@ func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone strin
 		hostedZone := ibclient.IBObject
 		// hostedZone := provider.NewDNSHostedZone(h.ProviderType(), z.Ref, dns.NormalizeHostname(z.Fqdn), z.Fqdn, forwarded, false)
 		zones = append(zones, hostedZone)
-	}
+	// }
 	return zones, nil
 
 }

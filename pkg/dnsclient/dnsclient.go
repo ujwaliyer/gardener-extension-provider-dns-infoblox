@@ -118,11 +118,7 @@ func NewDNSClient(username string, password string) (DNSClient, error) {
 
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
-<<<<<<< HEAD
 func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone string) (map[string]struct{}, error) {
-=======
-func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone string) (map[string]string, error) {
->>>>>>> main
 	
 	var raw []ibclient.ZoneAuth
 	obj := ibclient.NewZoneAuth(ibclient.ZoneAuth{})
@@ -131,7 +127,6 @@ func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone strin
 		return nil, err
 	}
 
-<<<<<<< HEAD
 	// need to work on this; commenting til then
 	// blockedZones := utils.NewStringSet() // how to define this?
 	// zones := provider.DNSHostedZones{} // need to replace this
@@ -140,16 +135,6 @@ func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone strin
 	// 		fmt.Printf("ignoring blocked zone id: %s", z.Ref)
 	// 		continue
 	// 	}
-=======
-	// need to work on this
-	blockedZones := utils.NewStringSet() // how to define this?
-	zones := provider.DNSHostedZones{} // need to replace this
-	for _, z := range raw {
-		if blockedZones.Contains(z.Ref) {
-			fmt.Printf("ignoring blocked zone id: %s", z.Ref)
-			continue
-		}
->>>>>>> main
 
 		var resN []RecordNS
 		objN := ibclient.NewRecordNS(
@@ -171,22 +156,14 @@ func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone strin
 		hostedZone := ibclient.IBObject
 		// hostedZone := provider.NewDNSHostedZone(h.ProviderType(), z.Ref, dns.NormalizeHostname(z.Fqdn), z.Fqdn, forwarded, false)
 		zones = append(zones, hostedZone)
-<<<<<<< HEAD
 	// }
-=======
-	}
->>>>>>> main
 	return zones, nil
 
 }
 
 // CreateOrUpdateRecordSet creates or updates the resource recordset with the given name, record type, rrdatas, and ttl
 // in the managed zone with the given name or ID.
-func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error {
 	records, err := c.getRecordSet(name, record_type, zone)
-	if err != nil {
-		return err
-	}
 	for _, ip_addr := range ip_addrs {
 		if _, ok := records[ip_addr]; ok {
 			// entry already exists

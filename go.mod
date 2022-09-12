@@ -4,10 +4,12 @@ go 1.18
 
 require (
 	github.com/ahmetb/gen-crd-api-reference-docs v0.2.0
+	github.com/gardener/controller-manager-library v0.2.1-0.20200810091329-d980dbe10959
 	github.com/gardener/gardener v1.43.2
 	github.com/go-logr/logr v1.2.0
 	github.com/golang/mock v1.6.0
 	github.com/infobloxopen/infoblox-go-client/v2 v2.1.1
+	github.com/schrodit/gardener-extension-provider-dns-cloudflare v0.0.2
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/tools v0.1.9
@@ -29,6 +31,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bronze1man/yaml2json v0.0.0-20201022121239-82e774ec909d // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
+	github.com/cloudflare/cloudflare-go v0.36.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful v2.9.6+incompatible // indirect
@@ -50,6 +53,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38 // indirect
 	github.com/google/uuid v1.1.2 // indirect
@@ -80,7 +84,6 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/afero v1.6.0 // indirect
-	github.com/stretchr/testify v1.7.1 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.19.1 // indirect

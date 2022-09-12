@@ -116,6 +116,27 @@ func NewDNSClient(username string, password string) (DNSClient, error) {
 	}, nil
 }
 
+// get DNS client from secret reference
+func (c *dnsClient) NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef corev1.SecretReference) (DNSClient, error) {
+	secret, err := extensionscontroller.GetSecretByReference(ctx, c, &secretRef)
+	if err != nil {
+		return nil, err
+	}
+
+	username, ok := secret.Data['username']
+	if !ok {
+		return nil, fmt.Errorf("No username found")
+	}
+
+	password, ok := secret.Data['password']
+	if !ok {
+		return nil, fmt.Errorf("No password found")
+	}
+
+	return NewDNSClient(string(username), string(password))
+
+}
+
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
 func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone string) (map[string]struct{}, error) {

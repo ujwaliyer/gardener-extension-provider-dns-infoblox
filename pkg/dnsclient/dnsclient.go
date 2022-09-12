@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
-	"github.com/gardener/controller-manager-library/pkg/utils"
 )
 
 const (
@@ -37,7 +36,7 @@ type RecordTXT ibclient.RecordTXT
 type RecordNS ibclient.RecordNS
 
 type DNSClient interface {
-	GetManagedZones(ctx context.Context) (map[string]string, error)
+	GetManagedZones(ctx context.Context) (map[string]interface, error)
 	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error
 	DeleteRecordSet(ctx context.Context, managedZone, name, recordType string) error
 }
@@ -133,7 +132,7 @@ func (c *dnsClient) NewDNSClientFromSecretRef(ctx context.Context, c client.Clie
 		return nil, fmt.Errorf("No password found")
 	}
 
-	return NewDNSClient(string(username), string(password))
+	return NewDNSClient(username, password)
 
 }
 

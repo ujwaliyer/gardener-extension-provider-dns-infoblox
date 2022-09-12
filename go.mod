@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/ahmetb/gen-crd-api-reference-docs v0.2.0
-	github.com/gardener/controller-manager-library v0.2.1-0.20200810091329-d980dbe10959
 	github.com/gardener/gardener v1.43.2
 	github.com/go-logr/logr v1.2.0
 	github.com/golang/mock v1.6.0

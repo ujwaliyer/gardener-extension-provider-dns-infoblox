@@ -184,6 +184,12 @@ func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone strin
 
 // CreateOrUpdateRecordSet creates or updates the resource recordset with the given name, record type, rrdatas, and ttl
 // in the managed zone with the given name or ID.
+func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error {
+	records, err := c.getRecordSet(name, record_type, zone)
+	if err != nil {
+		return err
+	}
+
 	records, err := c.getRecordSet(name, record_type, zone)
 	for _, ip_addr := range ip_addrs {
 		if _, ok := records[ip_addr]; ok {

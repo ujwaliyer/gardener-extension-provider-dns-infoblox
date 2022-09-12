@@ -36,7 +36,7 @@ type RecordTXT ibclient.RecordTXT
 type RecordNS ibclient.RecordNS
 
 type DNSClient interface {
-	GetManagedZones(ctx context.Context) (map[string]interface, error)
+	GetManagedZones(ctx context.Context) (map[string]string, error)
 	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error
 	DeleteRecordSet(ctx context.Context, managedZone, name, recordType string) error
 }

@@ -13,12 +13,12 @@
 // limitations under the License.
 
 // +k8s:deepcopy-gen=package
-// +k8s:conversion-gen=github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config
+// +k8s:conversion-gen=github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config
 // +k8s:openapi-gen=true
 // +k8s:defaulter-gen=TypeMeta
 
 //go:generate gen-crd-api-reference-docs -api-dir . -config ../../../../hack/api-reference/config.json -template-dir ../../../../vendor/github.com/gardener/gardener/hack/api-reference/template -out-file ../../../../hack/api-reference/config.md
 
 // Package v1alpha1 contains the GCP provider configuration API resources.
-// +groupName=	cloudflare.dns.provider.extensions.config.gardener.cloud
-package v1alpha1 // import "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config/v1alpha1"
+// +groupName=	infoblox.dns.provider.extensions.config.gardener.cloud
+package v1alpha1 // import "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config/v1alpha1"

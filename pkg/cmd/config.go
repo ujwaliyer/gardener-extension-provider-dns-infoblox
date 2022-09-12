@@ -17,8 +17,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config"
-	configloader "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config/loader"
+	"github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config"
+	configloader "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config/loader"
 
 	"github.com/spf13/pflag"
 )

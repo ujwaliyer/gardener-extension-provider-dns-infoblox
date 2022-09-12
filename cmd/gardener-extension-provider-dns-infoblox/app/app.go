@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"os"
 
-	cfcmd "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/cmd"
-	cfdnsrecord "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/controller/dnsrecord"
+	cfcmd "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/cmd"
+	cfdnsrecord "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/controller/dnsrecord"
 
 	"github.com/gardener/gardener/extensions/pkg/controller"
 	controllercmd "github.com/gardener/gardener/extensions/pkg/controller/cmd"

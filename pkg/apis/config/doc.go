@@ -13,6 +13,6 @@
 // limitations under the License.
 
 // +k8s:deepcopy-gen=package
-// +groupName="cloudflare.dns.provider.extensions.config.gardener.cloud"
+// +groupName="infoblox.dns.provider.extensions.config.gardener.cloud"
 
-package config // import "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config"
+package config // import "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config"

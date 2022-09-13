@@ -17,8 +17,8 @@ package loader
 import (
 	"io/ioutil"
 
-	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config"
-	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config/install"
+	"github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config"
+	"github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config/install"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"

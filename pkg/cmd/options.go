@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	dnsrecordcontroller "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/controller/dnsrecord"
+	dnsrecordcontroller "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/controller/dnsrecord"
 
 	controllercmd "github.com/gardener/gardener/extensions/pkg/controller/cmd"
 	extensionsdnsrecordcontroller "github.com/gardener/gardener/extensions/pkg/controller/dnsrecord"

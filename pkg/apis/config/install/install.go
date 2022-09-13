@@ -15,8 +15,8 @@
 package install
 
 import (
-	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config"
-	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config/v1alpha1"
+	"github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config"
+	"github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"

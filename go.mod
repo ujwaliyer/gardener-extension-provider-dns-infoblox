@@ -1,4 +1,4 @@
-module github.com/schrodit/gardener-extension-provider-dns-cloudflare
+module github.com/ujwaliyer/gardener-extension-provider-dns-infoblox
 
 go 1.18
 
@@ -8,6 +8,7 @@ require (
 	github.com/go-logr/logr v1.2.0
 	github.com/golang/mock v1.6.0
 	github.com/infobloxopen/infoblox-go-client/v2 v2.1.1
+	github.com/schrodit/gardener-extension-provider-dns-cloudflare v0.0.2
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/tools v0.1.9

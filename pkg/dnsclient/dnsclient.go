@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
-	"github.com/gardener/controller-manager-library/pkg/utils"
 )
 
 const (
@@ -116,9 +115,30 @@ func NewDNSClient(username string, password string) (DNSClient, error) {
 	}, nil
 }
 
+// get DNS client from secret reference
+func (c *dnsClient) NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef corev1.SecretReference) (DNSClient, error) {
+	secret, err := extensionscontroller.GetSecretByReference(ctx, c, &secretRef)
+	if err != nil {
+		return nil, err
+	}
+
+	username, ok := secret.Data['username']
+	if !ok {
+		return nil, fmt.Errorf("No username found")
+	}
+
+	password, ok := secret.Data['password']
+	if !ok {
+		return nil, fmt.Errorf("No password found")
+	}
+
+	return NewDNSClient(username, password)
+
+}
+
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
-func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone string) (map[string]string, error) {
+func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone string) (map[string]struct{}, error) {
 	
 	var raw []ibclient.ZoneAuth
 	obj := ibclient.NewZoneAuth(ibclient.ZoneAuth{})
@@ -127,14 +147,14 @@ func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone strin
 		return nil, err
 	}
 
-	// need to work on this
-	blockedZones := utils.NewStringSet() // how to define this?
-	zones := provider.DNSHostedZones{} // need to replace this
-	for _, z := range raw {
-		if blockedZones.Contains(z.Ref) {
-			fmt.Printf("ignoring blocked zone id: %s", z.Ref)
-			continue
-		}
+	// need to work on this; commenting til then
+	// blockedZones := utils.NewStringSet() // how to define this?
+	// zones := provider.DNSHostedZones{} // need to replace this
+	// for _, z := range raw {
+	// 	if blockedZones.Contains(z.Ref) {
+	// 		fmt.Printf("ignoring blocked zone id: %s", z.Ref)
+	// 		continue
+	// 	}
 
 		var resN []RecordNS
 		objN := ibclient.NewRecordNS(
@@ -156,7 +176,7 @@ func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone strin
 		hostedZone := ibclient.IBObject
 		// hostedZone := provider.NewDNSHostedZone(h.ProviderType(), z.Ref, dns.NormalizeHostname(z.Fqdn), z.Fqdn, forwarded, false)
 		zones = append(zones, hostedZone)
-	}
+	// }
 	return zones, nil
 
 }
@@ -168,6 +188,8 @@ func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, nam
 	if err != nil {
 		return err
 	}
+
+	records, err := c.getRecordSet(name, record_type, zone)
 	for _, ip_addr := range ip_addrs {
 		if _, ok := records[ip_addr]; ok {
 			// entry already exists

@@ -28,10 +28,10 @@ type RecordAAAA ibclient.RecordAAAA
 type RecordCNAME ibclient.RecordCNAME
 type RecordTXT ibclient.RecordTXT
 
-// var _ Record = (*RecordA)(nil)
-// var _ Record = (*RecordAAAA)(nil)
-// var _ Record = (*RecordCNAME)(nil)
-// var _ Record = (*RecordTXT)(nil)
+var _ Record = (*RecordA)(nil)
+var _ Record = (*RecordAAAA)(nil)
+var _ Record = (*RecordCNAME)(nil)
+var _ Record = (*RecordTXT)(nil)
 
 type RecordNS ibclient.RecordNS
 
@@ -59,7 +59,7 @@ type InfobloxConfig struct {
 }
 
 type DefaultDNSHostedZone struct {
-	zoneid    dns.ZoneID // qualified zone id
+	zoneid    string // qualified zone id
 	domain    string     // base domain for zone
 	forwarded []string   // forwarded sub domains
 	key       string     // internal key used by provider (not used by this lib)
@@ -67,7 +67,7 @@ type DefaultDNSHostedZone struct {
 }
 
 // NewDNSClient creates a new dns client based on the Infoblox config provided
-func NewDNSClient(username string, password string) (DNSClient, error) {
+func NewDNSClient(ctx context.Context, username string, password string) (DNSClient, error) {
 
 	infobloxConfig := &InfobloxConfig{}
 
@@ -132,7 +132,7 @@ func (c *dnsClient) NewDNSClientFromSecretRef(ctx context.Context, c client.Clie
 		return nil, fmt.Errorf("No password found")
 	}
 
-	return NewDNSClient(username, password)
+	return NewDNSClient(ctx, username, password)
 
 }
 
@@ -173,7 +173,7 @@ func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone strin
 				forwarded = append(forwarded, res.Name)
 			}
 		}
-		hostedZone := ibclient.IBObject
+		hostedZone := DefaultDNSHostedZone{objN.Zone, obj.Ref, }
 		// hostedZone := provider.NewDNSHostedZone(h.ProviderType(), z.Ref, dns.NormalizeHostname(z.Fqdn), z.Fqdn, forwarded, false)
 		zones = append(zones, hostedZone)
 	// }
@@ -258,11 +258,17 @@ func (c *dnsClient) createRecord(name string, view string, zone string, ip_addr 
 		record.Canonical = ip_addr
 		record.Ttl = ttl
 	case type_TXT:
-
+		if n, err := strconv.Unquote(value); err == nil && !strings.Contains(value, " ") {
+			value = n
+		}
+		record = (*RecordTXT)(ibclient.NewRecordTXT(ibclient.RecordTXT{
+			Name: fqdn,
+			Text: value,
+			View: c.view,
+		}))
 	}
 
 	dns_record := ibclient.CreateObject(record.(ibclient.IBObject))
-
 	return dns_record
 
 }

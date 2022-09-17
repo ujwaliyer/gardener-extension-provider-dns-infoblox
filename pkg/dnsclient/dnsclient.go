@@ -262,8 +262,8 @@ func (c *dnsClient) createRecord(name string, view string, zone string, ip_addr 
 			value = n
 		}
 		record = (*RecordTXT)(ibclient.NewRecordTXT(ibclient.RecordTXT{
-			Name: fqdn,
-			Text: value,
+			Name: name,
+			Text: ip_addr,
 			View: c.view,
 		}))
 	}

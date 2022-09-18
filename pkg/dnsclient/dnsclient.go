@@ -16,9 +16,6 @@ const (
 	type_CNAME = "CNAME"
 	type_AAAA  = "AAAA"
 	type_TXT   = "TXT"
-
-	username = "admin"
-	password = "infoblox"
 )
 
 // type Record interface{}
@@ -61,13 +58,6 @@ type InfobloxConfig struct {
 	ProxyURL        *string `json:"proxyUrl,omitempty"`
 }
 
-type DefaultDNSHostedZone struct {
-	zoneid    string // qualified zone id
-	domain    string     // base domain for zone
-	forwarded []string   // forwarded sub domains
-	key       string     // internal key used by provider (not used by this lib)
-	isPrivate bool       // indicates a private zone
-}
 
 // NewDNSClient creates a new dns client based on the Infoblox config provided
 func NewDNSClient(ctx context.Context, username string, password string) (DNSClient, error) {

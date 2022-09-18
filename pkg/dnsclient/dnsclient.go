@@ -16,6 +16,9 @@ const (
 	type_CNAME = "CNAME"
 	type_AAAA  = "AAAA"
 	type_TXT   = "TXT"
+
+	username = "admin"
+	password = "infoblox"
 )
 
 // type Record interface{}
@@ -36,7 +39,7 @@ var _ Record = (*RecordTXT)(nil)
 type RecordNS ibclient.RecordNS
 
 type DNSClient interface {
-	GetManagedZones(ctx context.Context) (map[string]string, error)
+	GetManagedZones(ctx context.Context, view string, zone string) (map[string]string, error)
 	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error
 	DeleteRecordSet(ctx context.Context, managedZone, name, recordType string) error
 }
@@ -122,12 +125,12 @@ func (c *dnsClient) NewDNSClientFromSecretRef(ctx context.Context, c client.Clie
 		return nil, err
 	}
 
-	username, ok := secret.Data['username']
+	username, ok := secret.Data[username]
 	if !ok {
 		return nil, fmt.Errorf("No username found")
 	}
 
-	password, ok := secret.Data['password']
+	password, ok := secret.Data[password]
 	if !ok {
 		return nil, fmt.Errorf("No password found")
 	}
@@ -138,46 +141,17 @@ func (c *dnsClient) NewDNSClientFromSecretRef(ctx context.Context, c client.Clie
 
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
-func (c *dnsClient) GetManagedZones(ctx context.Context, view string, zone string) (map[string]struct{}, error) {
+func (c *dnsClient) GetManagedZones(ctx context.Context, view string) (ibclient.IBObject, error) {
 	
-	var raw []ibclient.ZoneAuth
-	obj := ibclient.NewZoneAuth(ibclient.ZoneAuth{})
-	err := c.client.GetObject(obj, "", &ibclient.QueryParams{}, &raw)
+	objMgr := ibclient.NewObjectManager(c, "VMWare", "")
+
+	// get all zones
+	all_zones, err  := ibclient.GetZoneAuth()
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
 	}
 
-	// need to work on this; commenting til then
-	// blockedZones := utils.NewStringSet() // how to define this?
-	// zones := provider.DNSHostedZones{} // need to replace this
-	// for _, z := range raw {
-	// 	if blockedZones.Contains(z.Ref) {
-	// 		fmt.Printf("ignoring blocked zone id: %s", z.Ref)
-	// 		continue
-	// 	}
-
-		var resN []RecordNS
-		objN := ibclient.NewRecordNS(
-			ibclient.RecordNS{
-				Zone: z.Fqdn,
-				View: *c.infobloxConfig.View,
-			},
-		)
-		err = c.GetObject(objN, "", &ibclient.QueryParams{}, &resN)
-		if err != nil {
-			return nil, fmt.Errorf("could not fetch NS records from zone '%s': %s", z.Fqdn, err)
-		}
-		forwarded := []string{}
-		for _, res := range resN {
-			if res.Name != z.name {
-				forwarded = append(forwarded, res.Name)
-			}
-		}
-		hostedZone := DefaultDNSHostedZone{objN.Zone, obj.Ref, }
-		// hostedZone := provider.NewDNSHostedZone(h.ProviderType(), z.Ref, dns.NormalizeHostname(z.Fqdn), z.Fqdn, forwarded, false)
-		zones = append(zones, hostedZone)
-	// }
-	return zones, nil
+	return all_zones, nil
 
 }
 

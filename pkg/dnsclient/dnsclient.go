@@ -36,7 +36,7 @@ var _ Record = (*RecordTXT)(nil)
 type RecordNS ibclient.RecordNS
 
 type DNSClient interface {
-	GetManagedZones(ctx context.Context, view string, zone string) (map[string]string, error)
+	GetManagedZones(ctx context.Context) (map[string]string, error)
 	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error
 	DeleteRecordSet(ctx context.Context, managedZone, name, recordType string) error
 }
@@ -131,7 +131,7 @@ func (c *dnsClient) NewDNSClientFromSecretRef(ctx context.Context, c client.Clie
 
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
-func (c *dnsClient) GetManagedZones(ctx context.Context, view string) (ibclient.IBObject, error) {
+func (c *dnsClient) GetManagedZones(ctx context.Context) (ibclient.IBObject, error) {
 	
 	objMgr := ibclient.NewObjectManager(c, "VMWare", "")
 

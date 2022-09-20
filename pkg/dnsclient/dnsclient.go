@@ -273,11 +273,7 @@ func (c *dnsClient) getRecordSet(name, record_type string, zone string) (map[str
 	if record_type != type_TXT {
 		return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
 	}
-
-	if rtype != dns.RS_TXT {
-		return nil, fmt.Errorf("record type %s not supported for GetRecord", rtype)
-	}
-
+	
 	execRequest := func(forceProxy bool) ([]byte, error) {
 		rt := ibclient.NewRecordTXT(ibclient.RecordTXT{})
 		urlStr := c.RequestBuilder.BuildUrl(ibclient.GET, rt.ObjectType(), "", rt.ReturnFields(), &ibclient.QueryParams{})

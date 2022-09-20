@@ -131,7 +131,7 @@ func (c *dnsClient) NewDNSClientFromSecretRef(ctx context.Context, c client.Clie
 
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
-func (c *dnsClient) GetManagedZones(ctx context.Context) (ibclient.IBObject, error) {
+func (c *dnsClient) GetManagedZones(ctx context.Context) []string {
 	
 	objMgr := ibclient.NewObjectManager(c, "VMWare", "")
 
@@ -141,8 +141,13 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (ibclient.IBObject, err
 		fmt.Println(err)
 	}
 
-	return all_zones, nil
+	var zone_list []string
 
+	for _, zone := range all_zones {
+		zone_list = append(zone_list, zone.Fqdn)
+	}
+
+	return zone_list
 }
 
 // CreateOrUpdateRecordSet creates or updates the resource recordset with the given name, record type, rrdatas, and ttl

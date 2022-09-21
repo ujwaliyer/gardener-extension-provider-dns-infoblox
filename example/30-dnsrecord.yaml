@@ -37,6 +37,7 @@ metadata:
   namespace: shoot--foobar--gcp
 spec:
   type: infoblox-dns
+  view: infoview
   secretRef:
     name: dnsrecord-external
     namespace: shoot--foobar--gcp

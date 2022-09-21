@@ -68,7 +68,7 @@ func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRec
 	// Create or update DNS recordset
 	ttl := extensionsv1alpha1helper.GetDNSRecordTTL(dns.Spec.TTL)
 	a.logger.Info("Creating or updating DNS recordset", "managedZone", managedZone, "name", dns.Spec.Name, "type", dns.Spec.RecordType, "rrdatas", dns.Spec.Values, "dnsrecord", kutil.ObjectName(dns))
-	if err := dnsClient.CreateOrUpdateRecordSet(ctx, managedZone, dns.Spec.Name, string(dns.Spec.RecordType), dns.Spec.Values, ttl); err != nil {
+	if err := dnsClient.CreateOrUpdateRecordSet(ctx, dns.Spec.view, managedZone, dns.Spec.Name, string(dns.Spec.RecordType), dns.Spec.Values, ttl); err != nil {
 		return &reconcilerutils.RequeueAfterError{
 			Cause:        fmt.Errorf("could not create or update DNS recordset in managed zone %s with name %s, type %s, and rrdatas %v: %+v", managedZone, dns.Spec.Name, dns.Spec.RecordType, dns.Spec.Values, err),
 			RequeueAfter: requeueAfterOnProviderError,
@@ -118,10 +118,12 @@ func (a *actuator) Delete(ctx context.Context, dns *extensionsv1alpha1.DNSRecord
 	return nil
 }
 
+/*
 // Restore restores the DNSRecord.
 func (a *actuator) Restore(ctx context.Context, dns *extensionsv1alpha1.DNSRecord, cluster *extensionscontroller.Cluster) error {
 	return a.Reconcile(ctx, dns, cluster)
 }
+*/
 
 // Migrate migrates the DNSRecord.
 func (a *actuator) Migrate(context.Context, *extensionsv1alpha1.DNSRecord, *extensionscontroller.Cluster) error {
@@ -152,3 +154,25 @@ func (a *actuator) getManagedZone(ctx context.Context, dns *extensionsv1alpha1.D
 		return zone, nil
 	}
 }
+
+/*
+func lookupHosts(hostname string) ([]string, []string, error) {
+	ips, err := net.LookupIP(hostname)
+	if err != nil {
+		return nil, nil, err
+	}
+	ipv4addrs := make([]string, 0, len(ips))
+	ipv6addrs := make([]string, 0, len(ips))
+	for _, ip := range ips {
+		if ip.To4() != nil {
+			ipv4addrs = append(ipv4addrs, ip.String())
+		} else if ip.To16() != nil {
+			ipv6addrs = append(ipv6addrs, ip.String())
+		}
+	}
+	if len(ipv4addrs) == 0 && len(ipv6addrs) == 0 {
+		return nil, nil, fmt.Errorf("%s has no IPv4/IPv6 address (of %d addresses)", hostname, len(ips))
+	}
+	return ipv4addrs, ipv6addrs, nil
+}
+*/

@@ -118,12 +118,10 @@ func (a *actuator) Delete(ctx context.Context, dns *extensionsv1alpha1.DNSRecord
 	return nil
 }
 
-/*
 // Restore restores the DNSRecord.
 func (a *actuator) Restore(ctx context.Context, dns *extensionsv1alpha1.DNSRecord, cluster *extensionscontroller.Cluster) error {
 	return a.Reconcile(ctx, dns, cluster)
 }
-*/
 
 // Migrate migrates the DNSRecord.
 func (a *actuator) Migrate(context.Context, *extensionsv1alpha1.DNSRecord, *extensionscontroller.Cluster) error {

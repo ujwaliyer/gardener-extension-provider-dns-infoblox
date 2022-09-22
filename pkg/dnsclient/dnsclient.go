@@ -36,13 +36,13 @@ var _ Record = (*RecordTXT)(nil)
 type RecordNS ibclient.RecordNS
 
 type DNSClient interface {
-	GetManagedZones(ctx context.Context) (map[string]string, error)
+	GetManagedZones(ctx context.Context) ([]string)
 	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error
 	DeleteRecordSet(ctx context.Context, managedZone, name, recordType string) error
 }
 
 type dnsClient struct {
-	client ibclient.IBConnector
+	client ibclient.Connector
 }
 
 type InfobloxConfig struct {
@@ -252,18 +252,6 @@ func (c *dnsClient) deleteRecord(record Record, zone string) error {
 
 	return nil
 
-}
-
-func (c *dnsClient) getZoneID(ctx context.Context, name string) (string, error) {
-	zones, err := c.GetManagedZones(ctx)
-	if err != nil {
-		return "", err
-	}
-	zoneID, ok := zones[name]
-	if !ok {
-		return "", fmt.Errorf("No zone found for %s", name)
-	}
-	return zoneID, nil
 }
 
 func (c *dnsClient) getRecordSet(name, record_type string, zone string) (map[string]Record, error) {

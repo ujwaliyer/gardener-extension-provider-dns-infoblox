@@ -7,6 +7,7 @@ require (
 	github.com/gardener/gardener v1.43.2
 	github.com/go-logr/logr v1.2.0
 	github.com/golang/mock v1.6.0
+	github.com/infobloxopen/infoblox-go-client v1.1.0
 	github.com/infobloxopen/infoblox-go-client/v2 v2.1.1
 	github.com/onsi/ginkgo/v2 v2.1.6
 	github.com/onsi/gomega v1.20.1

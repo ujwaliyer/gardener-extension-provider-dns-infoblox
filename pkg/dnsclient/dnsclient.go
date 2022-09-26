@@ -36,7 +36,7 @@ var _ Record = (*RecordTXT)(nil)
 type RecordNS ibclient.RecordNS
 
 type DNSClient interface {
-	GetManagedZones(ctx context.Context) ([]string)
+	GetManagedZones(ctx context.Context) ([]string, error)
 	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error
 	DeleteRecordSet(ctx context.Context, managedZone, name, recordType string) error
 }
@@ -131,14 +131,15 @@ func (c *dnsClient) NewDNSClientFromSecretRef(ctx context.Context, c client.Clie
 
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
-func (c *dnsClient) GetManagedZones(ctx context.Context) []string {
+func (c *dnsClient) GetManagedZones(ctx context.Context) ([]string, error) {
 	
 	objMgr := ibclient.NewObjectManager(c, "VMWare", "")
 
 	// get all zones
 	all_zones, err  := ibclient.GetZoneAuth()
 	if err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
+		return nil, err
 	}
 
 	var zone_list []string
@@ -147,7 +148,7 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) []string {
 		zone_list = append(zone_list, zone.Fqdn)
 	}
 
-	return zone_list
+	return zone_list, nil
 }
 
 // CreateOrUpdateRecordSet creates or updates the resource recordset with the given name, record type, rrdatas, and ttl

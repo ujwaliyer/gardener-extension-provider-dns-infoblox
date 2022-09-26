@@ -5,10 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 
+	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
+	"github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/vendor/sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -21,7 +27,7 @@ const (
 // type Record interface{}
 type Record ibclient.IBObject
 
-var RecordSet []Record
+type RecordSet []Record
 
 type RecordA ibclient.RecordA
 type RecordAAAA ibclient.RecordAAAA
@@ -58,7 +64,6 @@ type InfobloxConfig struct {
 	ProxyURL        *string `json:"proxyUrl,omitempty"`
 }
 
-
 // NewDNSClient creates a new dns client based on the Infoblox config provided
 func NewDNSClient(ctx context.Context, username string, password string) (DNSClient, error) {
 
@@ -66,8 +71,8 @@ func NewDNSClient(ctx context.Context, username string, password string) (DNSCli
 
 	// define hostConfig
 	hostConfig := ibclient.HostConfig{
-		host:     *infobloxConfig.Host,
-		Port:     *infobloxConfig.Port,
+		Host:     *infobloxConfig.Host,
+		Port:     strconv.Itoa(*infobloxConfig.Port),
 		Version:  *infobloxConfig.Version,
 		Username: username,
 		Password: password,
@@ -94,13 +99,13 @@ func NewDNSClient(ctx context.Context, username string, password string) (DNSCli
 	}
 
 	// define transportConfig
-	transportConfig := ibclient.NewTransportConfig(verify, infobloxConfig.RequestTimeout, infobloxConfig.PoolConnections)
+	transportConfig := ibclient.NewTransportConfig(verify, *infobloxConfig.RequestTimeout, *infobloxConfig.PoolConnections)
 
 	var requestBuilder ibclient.HttpRequestBuilder = &ibclient.WapiRequestBuilder{}
 
 	dns_client, err := ibclient.NewConnector(hostConfig, transportConfig, requestBuilder, &ibclient.WapiHttpRequestor)
 	if err != nil {
-		fmt.Errorf(err)
+		log.Println(err)
 	}
 
 	return &dnsClient{
@@ -132,11 +137,11 @@ func (c *dnsClient) NewDNSClientFromSecretRef(ctx context.Context, c client.Clie
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
 func (c *dnsClient) GetManagedZones(ctx context.Context) (ibclient.IBObject, error) {
-	
+
 	objMgr := ibclient.NewObjectManager(c, "VMWare", "")
 
 	// get all zones
-	all_zones, err  := ibclient.GetZoneAuth()
+	all_zones, err := ibclient.GetZoneAuth()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -153,7 +158,7 @@ func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, nam
 		return err
 	}
 
-	records, err := c.getRecordSet(name, record_type, zone)
+	//records, err := c.getRecordSet(name, record_type, zone)
 	for _, ip_addr := range ip_addrs {
 		if _, ok := records[ip_addr]; ok {
 			// entry already exists
@@ -198,9 +203,9 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, record_type
 // create DNS record for the Infoblox DDI setup
 func (c *dnsClient) createRecord(name string, view string, zone string, ip_addr string, ttl int64, record_type string) Record {
 
-	dns_objmgr, err := ibclient.NewObjectManager(c, "VMWare", "")
+	dns_objmgr := ibclient.NewObjectManager(c, "VMWare", "")
 
-	var record ibclient.IBObject
+	var record ibclient.IBObjectManager
 
 	switch record_type {
 	case type_A:
@@ -305,7 +310,7 @@ func (c *dnsClient) getRecordSet(name, record_type string, zone string) (map[str
 		return nil, err
 	}
 
-	rs2 := RecordSet[]
+	rs2 := []RecordSet{}
 	for _, r := range rs {
 		rs2 = append(rs2, r.Copy())
 	}

@@ -5,10 +5,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 
+	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
+	"golang.org/x/vuln/client"
 )
 
 const (
@@ -21,7 +26,7 @@ const (
 // type Record interface{}
 type Record ibclient.IBObject
 
-var RecordSet []Record
+type RecordSet []Record
 
 type RecordA ibclient.RecordA
 type RecordAAAA ibclient.RecordAAAA
@@ -42,7 +47,7 @@ type DNSClient interface {
 }
 
 type dnsClient struct {
-	client ibclient.Connector
+	client ibclient.IBConnector
 }
 
 type InfobloxConfig struct {
@@ -57,7 +62,6 @@ type InfobloxConfig struct {
 	MaxResults      int     `json:"maxResults,omitempty"`
 	ProxyURL        *string `json:"proxyUrl,omitempty"`
 }
-
 
 // NewDNSClient creates a new dns client based on the Infoblox config provided
 func NewDNSClient(ctx context.Context, username string, password string) (DNSClient, error) {
@@ -132,11 +136,11 @@ func (c *dnsClient) NewDNSClientFromSecretRef(ctx context.Context, c client.Clie
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
 func (c *dnsClient) GetManagedZones(ctx context.Context) ([]string, error) {
-	
+
 	objMgr := ibclient.NewObjectManager(c, "VMWare", "")
 
 	// get all zones
-	all_zones, err  := ibclient.GetZoneAuth()
+	all_zones, err := ibclient.GetZoneAuth()
 	if err != nil {
 		// fmt.Println(err)
 		return nil, err
@@ -255,14 +259,14 @@ func (c *dnsClient) deleteRecord(record Record, zone string) error {
 
 }
 
-func (c *dnsClient) getRecordSet(name, record_type string, zone string) (map[string]Record, error) {
+func (c *dnsClient) getRecordSet(name, record_type string, zone string) ([]RecordSet, error) {
 
 	results, err := c.client.GetObject()
 
 	if record_type != type_TXT {
 		return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
 	}
-	
+
 	execRequest := func(forceProxy bool) ([]byte, error) {
 		rt := ibclient.NewRecordTXT(ibclient.RecordTXT{})
 		urlStr := c.RequestBuilder.BuildUrl(ibclient.GET, rt.ObjectType(), "", rt.ReturnFields(), &ibclient.QueryParams{})
@@ -295,7 +299,7 @@ func (c *dnsClient) getRecordSet(name, record_type string, zone string) (map[str
 		return nil, err
 	}
 
-	rs2 := RecordSet[]
+	rs2 := []RecordSet{}
 	for _, r := range rs {
 		rs2 = append(rs2, r.Copy())
 	}

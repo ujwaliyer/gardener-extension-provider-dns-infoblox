@@ -26,7 +26,7 @@ const (
 )
 
 // type Record interface{}
-type Record struct{}
+type Record ibclient.IBObject
 
 type RecordSet []Record
 
@@ -144,7 +144,7 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 func (c *dnsClient) GetManagedZones(ctx context.Context) ([]string, error) {
 
 	// get all zones
-	// todo: zoneauth only supported in v1; record creation needs v2; what to do?
+	// todo: getzoneauth only supported in v1; record creation needs v2; what to do?
 	all_zones, err := ibclient.GetZoneAuth()
 	if err != nil {
 		// fmt.Println(err)
@@ -215,23 +215,23 @@ func (c *dnsClient) createRecord(name string, view string, zone string, ip_addr 
 
 	// dns_objmgr := ibclient.NewObjectManager(c, "VMWare", "")
 
-	// var record ibclient.IBObjectManager
+	var record Record
 
 	switch record_type {
 	case type_A:
-		record := ibclient.NewEmptyRecordA()
+		record := ibclient2.NewEmptyRecordA()
 		record.View = view
 		record.Name = name
 		record.IpV4Addr = ip_addr
 		record.Ttl = ttl
 	case type_AAAA:
-		record := ibclient.NewEmptyRecordAAAA()
+		record := ibclient2.NewEmptyRecordAAAA()
 		record.View = view
 		record.Name = name
 		record.IpV6Addr = ip_addr
 		record.Ttl = ttl
 	case type_CNAME:
-		record := ibclient.NewEmptyRecordCNAME()
+		record := ibclient2.NewEmptyRecordCNAME()
 		record.View = view
 		record.Name = name
 		record.Canonical = ip_addr
@@ -243,11 +243,11 @@ func (c *dnsClient) createRecord(name string, view string, zone string, ip_addr 
 		record = (*RecordTXT)(ibclient.NewRecordTXT(ibclient.RecordTXT{
 			Name: name,
 			Text: ip_addr,
-			View: c.view,
+			View: c.View,
 		}))
 	}
 
-	dns_record := ibclient.CreateObject(record.(ibclient.IBObject))
+	dns_record := ibclient2.CreateObject(record.(ibclient.IBObject))
 	return dns_record
 
 }

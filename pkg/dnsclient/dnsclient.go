@@ -14,15 +14,15 @@ import (
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	ibclient "github.com/infobloxopen/infoblox-go-client"
 	ibclient2 "github.com/infobloxopen/infoblox-go-client/v2"
-	"golang.org/x/vuln/client"
 	corev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
-	type_A     = "A"
-	type_CNAME = "CNAME"
-	type_AAAA  = "AAAA"
-	type_TXT   = "TXT"
+	type_A     = "record:a"
+	type_CNAME = "record:cname"
+	type_AAAA  = "record:cname"
+	type_TXT   = "record:txt"
 )
 
 // type Record interface{}
@@ -36,7 +36,7 @@ type RecordCNAME ibclient.RecordCNAME
 type RecordTXT ibclient.RecordTXT
 
 var _ Record = (*RecordA)(nil)
-var _ Record = (*RecordAAAA)(nil)
+var _ Record = (*RecordAAAA)(nil) // doesn't resolve in v2
 var _ Record = (*RecordCNAME)(nil)
 var _ Record = (*RecordTXT)(nil)
 
@@ -109,6 +109,7 @@ func NewDNSClient(ctx context.Context, username string, password string) (DNSCli
 		fmt.Println(err)
 	}
 
+	// todo: set correct type for dns_client to create dns_object
 	dns_object := ibclient2.CreateObject(dns_client.(ibclient.IBObject))
 
 	return &dnsClient{
@@ -118,7 +119,7 @@ func NewDNSClient(ctx context.Context, username string, password string) (DNSCli
 
 // get DNS client from secret reference
 // todo: rewrite client parameter
-// func (dc *dnsClient) NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef corev1.SecretReference) (DNSClient, error) {
+// func (c *dnsClient) NewDNSClientFromSecretRef(ctx context.Context, cl client.Client, secretRef corev1.SecretReference) (DNSClient, error) {
 func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef corev1.SecretReference) (DNSClient, error) {
 	secret, err := extensionscontroller.GetSecretByReference(ctx, c, &secretRef)
 	if err != nil {

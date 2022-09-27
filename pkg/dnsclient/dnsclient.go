@@ -21,7 +21,7 @@ import (
 const (
 	type_A     = "record:a"
 	type_CNAME = "record:cname"
-	type_AAAA  = "record:cname"
+	type_AAAA  = "record:aaaa"
 	type_TXT   = "record:txt"
 )
 
@@ -145,8 +145,10 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 func (c *dnsClient) GetManagedZones(ctx context.Context) ([]string, error) {
 
 	// get all zones
+	objMgr := ibclient.NewObjectManager(c, "VMWare", "")
+
 	// todo: getzoneauth only supported in v1; record creation needs v2; what to do?
-	all_zones, err := ibclient.GetZoneAuth()
+	all_zones, err := objMgr.GetZoneAuth()
 	if err != nil {
 		// fmt.Println(err)
 		return nil, err
@@ -220,7 +222,7 @@ func (c *dnsClient) createRecord(name string, view string, zone string, ip_addr 
 
 	switch record_type {
 	case type_A:
-		record := ibclient2.NewEmptyRecordA()
+		record = ibclient.NewEmptyRecordA()
 		record.View = view
 		record.Name = name
 		record.IpV4Addr = ip_addr

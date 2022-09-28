@@ -33,6 +33,8 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bronze1man/yaml2json v0.0.0-20201022121239-82e774ec909d // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
+	github.com/coreos/etcd v3.3.17+incompatible // indirect
+	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful v2.9.6+incompatible // indirect
@@ -84,6 +86,7 @@ require (
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/afero v1.6.0 // indirect
 	github.com/stretchr/testify v1.7.1 // indirect
+	go.etcd.io/etcd v3.3.27+incompatible // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.19.1 // indirect
@@ -125,6 +128,8 @@ require (
 
 replace (
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.11.0 // keep this value in sync with sigs.k8s.io/controller-runtime
+
+	github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient/test v1.0.0 => ../pkg/dnsclient/test
 	k8s.io/api => k8s.io/api v0.23.3
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.23.3
 	k8s.io/apimachinery => k8s.io/apimachinery v0.23.3

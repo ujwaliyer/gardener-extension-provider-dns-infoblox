@@ -1,19 +1,26 @@
 package integration
 
 import (
-	// "fmt"
+	"fmt"
+	ibclient "github.com/infobloxopen/infoblox-go-client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	infobloxdnsconfig "pkg/dnsclient/testInfoBlox"
+	testInfoBlox "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient/test"
+	// "testing"
 	// . "testInfoblox"
 )
 
 var _ = Describe("Dnsclient", func() {
+
+	Before(func() {
+		conn := testInfoBlox.GetInfoBloxInstance()
+		objMgr := ibclient.NewObjectManager(connec, "VMWare", "")
+	})
 	Context("with connect api ", func() {
-		It("should connect to infoblox server", func() {
-			conn := testInfoBlox.GetInfoBloxInstance()
+		It("should get the Zone Auth", func() {
+			zoneAuth := objMgr.GetZoneAuth()
 			fmt.Println(conn)
-			Expect("abc").To(Equal("abc"))
+			Expect().To(Equal(conn1))
 		})
 	})
 })

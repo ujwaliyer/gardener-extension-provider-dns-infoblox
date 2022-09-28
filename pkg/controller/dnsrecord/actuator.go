@@ -54,7 +54,7 @@ func NewActuator(logger logr.Logger) dnsrecord.Actuator {
 }
 
 // Reconcile reconciles the DNSRecord.
-func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRecord, cluster *extensionscontroller.Cluster, secretRef corev1.SecretReference) error {
+func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRecord, cluster *extensionscontroller.Cluster) error {
 	dnsClient, err := dnsclient.NewDNSClientFromSecretRef(ctx, a.Client(), dns.Spec.SecretRef)
 	if err != nil {
 		return err
@@ -69,7 +69,7 @@ func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRec
 	// Create or update DNS recordset
 	ttl := extensionsv1alpha1helper.GetDNSRecordTTL(dns.Spec.TTL)
 	a.logger.Info("Creating or updating DNS recordset", "managedZone", managedZone, "name", dns.Spec.Name, "type", dns.Spec.RecordType, "rrdatas", dns.Spec.Values, "dnsrecord", kutil.ObjectName(dns))
-	secret, err := extensionscontroller.GetSecretByReference(ctx, c, &secretRef)
+	secret, err := extensionscontroller.GetSecretByReference(ctx, c, dns.Spec.SecretRef)
 	if err != nil {
 		return nil, err
 	}

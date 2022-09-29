@@ -31,7 +31,7 @@ type Record ibclient.IBObject
 type RecordSet []Record
 
 type RecordA ibclient.RecordA
-type RecordAAAA ibclient2.RecordAAAA
+type RecordAAAA ibclient.RecordAAAA
 type RecordCNAME ibclient.RecordCNAME
 type RecordTXT ibclient.RecordTXT
 

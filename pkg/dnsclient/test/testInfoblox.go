@@ -1,4 +1,8 @@
+<<<<<<< HEAD:pkg/dnsclient/testInfoblox.go
+package dnsclient
+=======
 package test
+>>>>>>> 46ff0dd49da32ad23ecae5d57a3738254706f5b0:pkg/dnsclient/test/testInfoblox.go
 
 import (
 	"fmt"

@@ -1,4 +1,8 @@
+<<<<<<< HEAD:pkg/dnsclient/testInfoblox.go
 package dnsclient
+=======
+package test
+>>>>>>> 46ff0dd49da32ad23ecae5d57a3738254706f5b0:pkg/dnsclient/test/testInfoblox.go
 
 import (
 	"fmt"
@@ -32,18 +36,18 @@ func GetInfoBloxInstance() *ibclient.Connector {
 }
 
 // func main() {
-// 	connec := getInfoBloxInstance()
-// 	connec1 := getInfoBloxInstance()
-// 	fmt.Println(connec1)
-// 	defer connec.Logout()
+// 	connec := GetInfoBloxInstance()
+// 	// 	connec1 := getInfoBloxInstance()
+// 	// 	fmt.Println(connec1)
+// 	// 	defer connec.Logout()
 // 	objMgr := ibclient.NewObjectManager(connec, "VMWare", "")
-// 	// fmt.Println(objMgr.GetLicenceInfo())
-// 	fmt.Println(objMgr.GetLicense())
-// 	fmt.Println(objMgr.GetAllMembers())
-// 	// fmt.Println(objMgr.GetARecordByRef())
-// 	// fmt.Println(objMgr.GetCapacityReport())
-// 	fmt.Println(objMgr.GetLicense())
+// 	// 	// fmt.Println(objMgr.GetLicenceInfo())
+// 	// 	fmt.Println(objMgr.GetLicense())
+// 	// 	fmt.Println(objMgr.GetAllMembers())
+// 	// 	// fmt.Println(objMgr.GetARecordByRef())
+// 	// 	// fmt.Println(objMgr.GetCapacityReport())
+// 	// 	fmt.Println(objMgr.GetLicense())
 
-// 	// Fetches grid information
+// 	// 	// Fetches grid information
 // 	fmt.Println(objMgr.GetZoneAuth())
 // }

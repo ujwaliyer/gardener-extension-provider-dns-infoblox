@@ -14,12 +14,20 @@ import (
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	ibclient1 "github.com/infobloxopen/infoblox-go-client"
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
+<<<<<<< HEAD
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+=======
+	// "go.etcd.io/etcd/client"
+>>>>>>> 46ff0dd49da32ad23ecae5d57a3738254706f5b0
 )
 
 type DNSClient interface {
+<<<<<<< HEAD
 	GetManagedZones(ctx context.Context) ([]string, error)
+=======
+	GetManagedZones(ctx context.Context) []string
+>>>>>>> 46ff0dd49da32ad23ecae5d57a3738254706f5b0
 	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error
 	DeleteRecordSet(ctx context.Context, managedZone, name, recordType string) error
 }

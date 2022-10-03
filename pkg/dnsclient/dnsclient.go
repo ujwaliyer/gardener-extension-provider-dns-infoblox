@@ -120,7 +120,7 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
-func (c *dnsClient) GetManagedZones(ctx context.Context) ([]string, error) {
+func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, error) {
 
 	// get all zones; need separate connector for using this function
 	objMgr := ibclient1.NewObjectManager(c, "VMWare", "")
@@ -132,10 +132,12 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) ([]string, error) {
 		return nil, err
 	}
 
-	var zone_list []string
+	// var zone_list []string
+	zone_list := make(map[string]string)
 
 	for _, zone := range all_zones {
-		zone_list = append(zone_list, zone.Fqdn)
+		// zone_list = append(zone_list, zone.Fqdn)
+		zone_list[zone.Ref] = zone.Fqdn
 	}
 
 	return zone_list, nil

@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"fmt"
@@ -32,18 +32,18 @@ func GetInfoBloxInstance() *ibclient.Connector {
 }
 
 // func main() {
-// 	connec := getInfoBloxInstance()
-// 	connec1 := getInfoBloxInstance()
-// 	fmt.Println(connec1)
-// 	defer connec.Logout()
+// 	connec := GetInfoBloxInstance()
+// 	// 	connec1 := getInfoBloxInstance()
+// 	// 	fmt.Println(connec1)
+// 	// 	defer connec.Logout()
 // 	objMgr := ibclient.NewObjectManager(connec, "VMWare", "")
-// 	// fmt.Println(objMgr.GetLicenceInfo())
-// 	fmt.Println(objMgr.GetLicense())
-// 	fmt.Println(objMgr.GetAllMembers())
-// 	// fmt.Println(objMgr.GetARecordByRef())
-// 	// fmt.Println(objMgr.GetCapacityReport())
-// 	fmt.Println(objMgr.GetLicense())
+// 	// 	// fmt.Println(objMgr.GetLicenceInfo())
+// 	// 	fmt.Println(objMgr.GetLicense())
+// 	// 	fmt.Println(objMgr.GetAllMembers())
+// 	// 	// fmt.Println(objMgr.GetARecordByRef())
+// 	// 	// fmt.Println(objMgr.GetCapacityReport())
+// 	// 	fmt.Println(objMgr.GetLicense())
 
-// 	// Fetches grid information
+// 	// 	// Fetches grid information
 // 	fmt.Println(objMgr.GetZoneAuth())
 // }

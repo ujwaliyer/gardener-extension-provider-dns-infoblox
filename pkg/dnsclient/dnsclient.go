@@ -5,10 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
+	// "go.etcd.io/etcd/client"
 )
 
 const (
@@ -36,7 +40,7 @@ var _ Record = (*RecordTXT)(nil)
 type RecordNS ibclient.RecordNS
 
 type DNSClient interface {
-	GetManagedZones(ctx context.Context) ([]string)
+	GetManagedZones(ctx context.Context) []string
 	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error
 	DeleteRecordSet(ctx context.Context, managedZone, name, recordType string) error
 }
@@ -57,7 +61,6 @@ type InfobloxConfig struct {
 	MaxResults      int     `json:"maxResults,omitempty"`
 	ProxyURL        *string `json:"proxyUrl,omitempty"`
 }
-
 
 // NewDNSClient creates a new dns client based on the Infoblox config provided
 func NewDNSClient(ctx context.Context, username string, password string) (DNSClient, error) {
@@ -132,11 +135,11 @@ func (c *dnsClient) NewDNSClientFromSecretRef(ctx context.Context, c client.Clie
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
 func (c *dnsClient) GetManagedZones(ctx context.Context) []string {
-	
+
 	objMgr := ibclient.NewObjectManager(c, "VMWare", "")
 
 	// get all zones
-	all_zones, err  := ibclient.GetZoneAuth()
+	all_zones, err := ibclient.GetZoneAuth()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -261,7 +264,7 @@ func (c *dnsClient) getRecordSet(name, record_type string, zone string) (map[str
 	if record_type != type_TXT {
 		return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
 	}
-	
+
 	execRequest := func(forceProxy bool) ([]byte, error) {
 		rt := ibclient.NewRecordTXT(ibclient.RecordTXT{})
 		urlStr := c.RequestBuilder.BuildUrl(ibclient.GET, rt.ObjectType(), "", rt.ReturnFields(), &ibclient.QueryParams{})

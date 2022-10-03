@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
-	"go.etcd.io/etcd/client"
+	// "go.etcd.io/etcd/client"
 )
 
 const (

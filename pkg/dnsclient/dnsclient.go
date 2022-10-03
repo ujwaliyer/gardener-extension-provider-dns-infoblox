@@ -149,6 +149,12 @@ func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, nam
 		return err
 	}
 
+	// adding separate segment
+	err_del := c.DeleteRecordSet(ctx, zone, name, record_type)
+	if err_del != nil {
+		fmt.Println(err_del)
+	}
+
 	// need second look at logic
 	for _, ip_addr := range ip_addrs {
 		if _, ok := records[ip_addr]; ok {
@@ -252,7 +258,7 @@ func (c *dnsClient) DeleteRecord(record Record, zone string) error {
 
 func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordSet, error) {
 
-	results, err := c.client.(*ibclient.Connector)
+	results := c.client.(*ibclient.Connector)
 
 	if record_type != type_TXT {
 		return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
@@ -279,6 +285,7 @@ func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordS
 	if err != nil {
 		// Forcing the request to redirect to Grid Master by making forcedProxy=true
 		resp, err = execRequest(true)
+		// fmt.Println(err)
 	}
 	if err != nil {
 		return nil, err

@@ -122,8 +122,29 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 // their user assigned resource names.
 func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, error) {
 
+	// dummy code for testing; might remove later
+	infobloxConfig := &InfobloxConfig{}
+
+	// define hostConfig
+	hostConfig := ibclient1.HostConfig{
+		Host:    *infobloxConfig.Host,
+		Port:    strconv.Itoa(*infobloxConfig.Port),
+		Version: *infobloxConfig.Version,
+	}
+	verify := "false"
+
+	// define transportConfig
+	transportConfig := ibclient1.NewTransportConfig(verify, *infobloxConfig.RequestTimeout, *infobloxConfig.PoolConnections)
+
+	var requestBuilder ibclient1.HttpRequestBuilder = &ibclient1.WapiRequestBuilder{}
+
+	dns_client1, err := ibclient1.NewConnector(hostConfig, transportConfig, requestBuilder, &ibclient1.WapiHttpRequestor{})
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	// get all zones; need separate connector for using this function
-	objMgr := ibclient1.NewObjectManager(c, "VMWare", "")
+	objMgr := ibclient1.NewObjectManager(dns_client1, "VMWare", "")
 
 	// todo: getzoneauth only supported in v1; record creation needs v2; what to do?
 	all_zones, err := objMgr.GetZoneAuth()
@@ -151,34 +172,20 @@ func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, nam
 		return err
 	}
 
-	// adding separate segment
 	err_del := c.DeleteRecordSet(ctx, zone, name, record_type)
 	if err_del != nil {
 		fmt.Println(err_del)
 	}
 
-	// need second look at logic
-	for _, ip_addr := range ip_addrs {
-		if _, ok := records[ip_addr]; ok {
-			// entry already exists
-			delete(records, ip_addr)
-			continue
-		}
-		rec := c.NewRecord(name, view, zone, ip_addr, ttl, record_type)
-		err = c.CreateRecord(rec, zone)
+	for _, r := range records {
+		r0 := c.NewRecord(r.GetDNSName(), view, zone, r.GetValue(), int64(r.GetTTL()), r.GetType())
+		err := c.CreateRecord(r0, zone)
 		if err != nil {
-			return err
+			fmt.Println(err)
 		}
-		delete(records, ip_addr)
 	}
 
-	// delete undefined data
-	for _, record := range records {
-		if err := c.DeleteRecord(ctx, zone, record.ID, name, record.name); err != nil {
-			return err
-		}
-	}
-	return nil
+	return err
 }
 
 // DeleteRecordSet deletes the resource recordset with the given name and record type

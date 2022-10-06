@@ -6,7 +6,9 @@ metadata:
   namespace: shoot--foobar--gcp
 type: Opaque
 data:
-# apiToken: base64(apiToken)
+  view: default
+# username: base64(username)
+# password: base64(password) 
 ---
 apiVersion: extensions.gardener.cloud/v1alpha1
 kind: Cluster

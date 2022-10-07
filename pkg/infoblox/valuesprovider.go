@@ -1,12 +1,23 @@
 package infoblox
 
 import (
+	"fmt"
+
+	"github.com/gardener/gardener/extensions/pkg/controller/common"
 	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
-	types "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/api/config/v1alph1/types"
+	kutil "github.com/gardener/gardener/pkg/utils/kubernetes"
+	"github.com/go-logr/logr"
+	types "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config/v1alpha1/types"
+	//"github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/controller/dnsrecord/actuator"
 )
 
+type actuator struct {
+	common.ClientContext
+	logger logr.Logger
+}
+
 func (a *actuator) GetControlPlaneChartValues(
-	_ context.Context,
+	//_ context.Context,
 	dns *extensionsv1alpha1.DNSRecord,
 	//cluster *extensionscontroller.Cluster,
 	//secretsReader secretsmanager.Reader,
@@ -17,7 +28,7 @@ func (a *actuator) GetControlPlaneChartValues(
 	cpConfig := &types.ProviderConfigManager{}
 	if dns.Spec.ProviderConfig != nil {
 		if _, _, err := a.Decoder().Decode(dns.Spec.ProviderConfig.Raw, nil, cpConfig); err != nil {
-			return nil, fmt.Errorf("could not decode providerConfig of controlplane '%s': %w", kutil.ObjectName(cp), err)
+			return nil, fmt.Errorf("could not decode providerConfig of dnsrecord '%s': %w", kutil.ObjectName(dns), err)
 		}
 	}
 

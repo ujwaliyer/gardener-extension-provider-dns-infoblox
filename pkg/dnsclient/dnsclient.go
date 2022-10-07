@@ -44,13 +44,14 @@ type InfobloxConfig struct {
 }
 
 // NewDNSClient creates a new dns client based on the Infoblox config provided
-func NewDNSClient(ctx context.Context, username string, password string) (DNSClient, error) {
+func NewDNSClient(ctx context.Context, username string, password string, host string) (DNSClient, error) {
 
 	infobloxConfig := &InfobloxConfig{}
 
 	// define hostConfig
 	hostConfig := ibclient.HostConfig{
-		Host:     *infobloxConfig.Host,
+		// Host:     *infobloxConfig.Host,
+		Host:     host,
 		Port:     strconv.Itoa(*infobloxConfig.Port),
 		Version:  *infobloxConfig.Version,
 		Username: username,
@@ -113,7 +114,13 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 		return nil, fmt.Errorf("no password found")
 	}
 
-	return NewDNSClient(ctx, string(username), string(password))
+	// placeholder for host details using providerConfig
+	host, ok := secret.Data["host"]
+	if !ok {
+		return nil, fmt.Errorf("no host details found")
+	}
+
+	return NewDNSClient(ctx, string(host), string(username), string(password))
 
 }
 

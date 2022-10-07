@@ -21,7 +21,7 @@ import (
 type DNSClient interface {
 	GetManagedZones(ctx context.Context) (map[string]string, error)
 	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error
-	DeleteRecordSet(ctx context.Context, managedZone, name, recordType string) error
+	DeleteRecordSet(ctx context.Context, zone, name, recordType string) error
 }
 
 type dnsClient struct {
@@ -96,7 +96,6 @@ func NewDNSClient(ctx context.Context, username string, password string) (DNSCli
 }
 
 // get DNS client from secret reference
-// todo: rewrite client parameter
 // func (c *dnsClient) NewDNSClientFromSecretRef(ctx context.Context, cl client.Client, secretRef corev1.SecretReference) (DNSClient, error) {
 func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef corev1.SecretReference) (DNSClient, error) {
 	secret, err := extensionscontroller.GetSecretByReference(ctx, c, &secretRef)
@@ -106,12 +105,12 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 
 	username, ok := secret.Data["username"]
 	if !ok {
-		return nil, fmt.Errorf("No username found")
+		return nil, fmt.Errorf("no username found")
 	}
 
 	password, ok := secret.Data["password"]
 	if !ok {
-		return nil, fmt.Errorf("No password found")
+		return nil, fmt.Errorf("no password found")
 	}
 
 	return NewDNSClient(ctx, string(username), string(password))

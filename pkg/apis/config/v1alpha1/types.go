@@ -30,5 +30,11 @@ type ControllerConfiguration struct {
 	// settings for the proxy server to use when communicating with the apiserver.
 	// +optional
 	ClientConnection *componentbaseconfigv1alpha1.ClientConnectionConfiguration `json:"clientConnection,omitempty"`
+}
 
+type InfobloxConfig struct {
+	metav1.TypeMeta `json:"inline"`
+
+	// View is the view in which the default DNS details are listed
+	View string `json:"view,omitempty"`
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gardener/gardener/extensions/pkg/controller/common"
 	ib_api "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
+	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
 	kutil "github.com/gardener/gardener/pkg/utils/kubernetes"
 
 )
@@ -14,7 +15,7 @@ type valueProvider struct {
 	common.ClientContext
 }
 
-func (vp *valueProvider) GetProviderConfig(_ context.Context, cp *ib_api.InfobloxConfig, cluster *extensionscontroller.Cluster) struct{} {
+func (vp *valueProvider) GetProviderConfig(_ context.Context, cp *extensionsv1alpha1.InfobloxConfig, cluster *extensionscontroller.Cluster) struct{} {
 
 	// decode InfobloxConfig
 	ibConfig := &ib_api.InfobloxConfig{}

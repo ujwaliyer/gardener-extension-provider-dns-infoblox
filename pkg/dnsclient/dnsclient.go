@@ -48,6 +48,10 @@ func NewDNSClient(ctx context.Context, username string, password string, host st
 
 	infobloxConfig := &InfobloxConfig{}
 
+	// var dns *extensionsv1alpha1.DNSRecord
+
+	// spec, err := providerconfig.GetDNSRecordValues(dns)
+
 	// define hostConfig
 	hostConfig := ibclient.HostConfig{
 		// Host:     *infobloxConfig.Host,

@@ -1,4 +1,4 @@
-package dnsclient
+package infoblox
 
 import (
 	"strconv"
@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	type_A     = "A"
-	type_CNAME = "CNAME"
-	type_AAAA  = "AAAA"
-	type_TXT   = "TXT"
+	Type_A     = "A"
+	Type_CNAME = "CNAME"
+	Type_AAAA  = "AAAA"
+	Type_TXT   = "TXT"
 )
 
 type Base_Record interface {

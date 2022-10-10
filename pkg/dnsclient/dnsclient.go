@@ -14,6 +14,7 @@ import (
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	ibclient1 "github.com/infobloxopen/infoblox-go-client"
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
+	"github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/infoblox"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -28,7 +29,7 @@ type dnsClient struct {
 	client ibclient.IBConnector
 }
 
-type RecordSet []Base_Record
+type RecordSet []infoblox.Base_Record
 
 type InfobloxConfig struct {
 	Host            *string `json:"host,omitempty"`
@@ -204,7 +205,7 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, record_type
 
 	for _, rec := range records {
 		if rec.GetId() != "" {
-			err := c.DeleteRecord(rec.(Record), zone)
+			err := c.DeleteRecord(rec.(infoblox.Record), zone)
 			if err != nil {
 				return err
 			}
@@ -214,35 +215,35 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, record_type
 }
 
 // create DNS record for the Infoblox DDI setup
-func (c *dnsClient) NewRecord(name string, view string, zone string, value string, ttl int64, record_type string) (record Record) {
+func (c *dnsClient) NewRecord(name string, view string, zone string, value string, ttl int64, record_type string) (record infoblox.Record) {
 
 	switch record_type {
-	case type_A:
+	case infoblox.Type_A:
 		r := ibclient.NewEmptyRecordA()
 		r.View = view
 		r.Name = name
 		r.Ipv4Addr = value
 		r.Ttl = uint32(ttl)
-		record = (*RecordA)(r)
-	case type_AAAA:
+		record = (*infoblox.RecordA)(r)
+	case infoblox.Type_AAAA:
 		r := ibclient.NewEmptyRecordAAAA()
 		r.View = view
 		r.Name = name
 		r.Ipv6Addr = value
 		r.Ttl = uint32(ttl)
-		record = (*RecordAAAA)(r)
-	case type_CNAME:
+		record = (*infoblox.RecordAAAA)(r)
+	case infoblox.Type_CNAME:
 		r := ibclient.NewEmptyRecordCNAME()
 		r.View = view
 		r.Name = name
 		r.Canonical = value
 		r.Ttl = uint32(ttl)
-		record = (*RecordCNAME)(r)
-	case type_TXT:
+		record = (*infoblox.RecordCNAME)(r)
+	case infoblox.Type_TXT:
 		if n, err := strconv.Unquote(value); err == nil && !strings.Contains(value, " ") {
 			value = n
 		}
-		record = (*RecordTXT)(ibclient.NewRecordTXT(ibclient.RecordTXT{
+		record = (*infoblox.RecordTXT)(ibclient.NewRecordTXT(ibclient.RecordTXT{
 			Name: name,
 			Text: value,
 			View: view,
@@ -252,14 +253,14 @@ func (c *dnsClient) NewRecord(name string, view string, zone string, value strin
 	return
 }
 
-func (c *dnsClient) CreateRecord(r Record, zone string) error {
+func (c *dnsClient) CreateRecord(r infoblox.Record, zone string) error {
 
 	_, err := c.client.CreateObject(r.(ibclient.IBObject))
 	return err
 
 }
 
-func (c *dnsClient) DeleteRecord(record Record, zone string) error {
+func (c *dnsClient) DeleteRecord(record infoblox.Record, zone string) error {
 
 	_, err := c.client.DeleteObject(record.GetId())
 
@@ -275,7 +276,7 @@ func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordS
 
 	results := c.client.(*ibclient.Connector)
 
-	if record_type != type_TXT {
+	if record_type != infoblox.Type_TXT {
 		return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
 	}
 
@@ -306,7 +307,7 @@ func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordS
 		return nil, err
 	}
 
-	rs := []RecordTXT{}
+	rs := []infoblox.RecordTXT{}
 	err = json.Unmarshal(resp, &rs)
 	if err != nil {
 		return nil, err

@@ -6,8 +6,9 @@ metadata:
   namespace: shoot--foobar--gcp
 type: Opaque
 data:
-# username: base64(username)
-# password: base64(password) 
+  username: base64(username)
+  password: base64(password) 
+  host: base64(HOST)
 ---
 apiVersion: extensions.gardener.cloud/v1alpha1
 kind: Cluster
@@ -40,7 +41,6 @@ spec:
   providerConfig:
     view: default
   type: infoblox-dns
-  view: infoview
   secretRef:
     name: dnsrecord-external
     namespace: shoot--foobar--gcp

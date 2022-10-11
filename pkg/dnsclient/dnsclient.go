@@ -14,7 +14,7 @@ import (
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	ibclient1 "github.com/infobloxopen/infoblox-go-client"
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
-	"github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/infoblox"
+	infoblox "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/infoblox"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )

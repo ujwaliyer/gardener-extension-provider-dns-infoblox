@@ -30,7 +30,9 @@ import (
 	reconcilerutils "github.com/gardener/gardener/pkg/controllerutils/reconciler"
 	kutil "github.com/gardener/gardener/pkg/utils/kubernetes"
 	"github.com/go-logr/logr"
-	types "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config/v1alpha1"
+
+	// types "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config/v1alpha1"
+	ib_api "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/infoblox"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -71,7 +73,7 @@ func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRec
 	a.logger.Info("Creating or updating DNS recordset", "managedZone", managedZone, "name", dns.Spec.Name, "type", dns.Spec.RecordType, "rrdatas", dns.Spec.Values, "dnsrecord", kutil.ObjectName(dns))
 
 	// getting providerConfig specs
-	specs, err := a.GetDNSRecordValues(dns)
+	specs, err := ib_api.GetDNSRecordValues(dns)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -183,21 +185,21 @@ func lookupHosts(hostname string) ([]string, []string, error) {
 }
 */
 
-func (a *actuator) GetDNSRecordValues(
-	//_ context.Context,
-	dns *extensionsv1alpha1.DNSRecord,
-	//cluster *extensionscontroller.Cluster,
-	//secretsReader secretsmanager.Reader,
-	//checksums map[string]string,
-	//scaledDown bool,
-) (map[string]interface{}, error) {
-	// Decode providerConfig
-	cpConfig := &types.ProviderConfigManager{}
-	if dns.Spec.ProviderConfig != nil {
-		if _, _, err := a.Decoder().Decode(dns.Spec.ProviderConfig.Raw, nil, cpConfig); err != nil {
-			return cpConfig, fmt.Errorf("could not decode providerConfig of dnsrecord '%s': %w", kutil.ObjectName(dns), err)
-		}
-	}
+// func (a *actuator) GetDNSRecordValues(
+// 	//_ context.Context,
+// 	dns *extensionsv1alpha1.DNSRecord,
+// 	//cluster *extensionscontroller.Cluster,
+// 	//secretsReader secretsmanager.Reader,
+// 	//checksums map[string]string,
+// 	//scaledDown bool,
+// ) (*types.ProviderConfigManager, error) {
+// 	// Decode providerConfig
+// 	cpConfig := &types.ProviderConfigManager{}
+// 	if dns.Spec.ProviderConfig != nil {
+// 		if _, _, err := a.Decoder().Decode(dns.Spec.ProviderConfig.Raw, nil, cpConfig); err != nil {
+// 			return cpConfig, fmt.Errorf("could not decode providerConfig of dnsrecord '%s': %w", kutil.ObjectName(dns), err)
+// 		}
+// 	}
 
-	return cpConfig
-}
+// 	return cpConfig, nil
+// }

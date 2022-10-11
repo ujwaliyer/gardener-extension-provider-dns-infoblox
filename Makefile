@@ -13,8 +13,8 @@
 # limitations under the License.
 
 EXTENSION_PREFIX            := gardener-extension
-NAME                        := provider-dns-cloudflare
-REGISTRY                    := ghcr.io/schrodit
+NAME                        := provider-dns-infoblox
+REGISTRY                    := ghcr.io/ujwaliyer
 IMAGE_PREFIX                := $(REGISTRY)/gardener-extension-
 REPO_ROOT                   := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 HACK_DIR                    := $(REPO_ROOT)/hack
@@ -107,7 +107,7 @@ check:
 
 .PHONY: check-docforge
 check-docforge: $(DOCFORGE)
-	@$(REPO_ROOT)/vendor/github.com/gardener/gardener/hack/check-docforge.sh $(REPO_ROOT) $(REPO_ROOT)/.docforge/manifest.yaml ".docforge/;docs/" "gardener-extension-provider-dns-cloudflare" false
+	@$(REPO_ROOT)/vendor/github.com/gardener/gardener/hack/check-docforge.sh $(REPO_ROOT) $(REPO_ROOT)/.docforge/manifest.yaml ".docforge/;docs/" "gardener-extension-provider-dns-infoblox" false
 
 .PHONY: generate
 generate:

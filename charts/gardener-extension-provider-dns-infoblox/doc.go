@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate sh -c "../../vendor/github.com/gardener/gardener/hack/generate-controller-registration.sh provider-dns-cloudflare . $(cat ../../VERSION) ../../example/controller-registration.yaml DNSRecord:cloudflare-dns"
+//go:generate sh -c "../../vendor/github.com/gardener/gardener/hack/generate-controller-registration.sh provider-dns-infoblox . $(cat ../../VERSION) ../../example/controller-registration.yaml DNSRecord:infoblox-dns"
 
 // Package chart enables go:generate support for generating the correct controller registration.
 package chart

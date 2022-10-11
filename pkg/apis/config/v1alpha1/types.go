@@ -42,8 +42,13 @@ type ProviderConfigManager struct {
 	View *string `json:"view,omitempty"`
 
 	//Port            *int    `json:"port,omitempty"`
-	//SSLVerify       *bool   `json:"sslVerify,omitempty"`
-	//Version         *string `json:"version,omitempty"`
+
+	// SSLVerify determines whether ssl verification will be done or not
+	SSLVerify *bool `json:"sslVerify,omitempty"`
+
+	// set up the wAPI version to be used for infoblox
+	Version *string `json:"version,omitempty"`
+
 	//PoolConnections *int    `json:"httpPoolConnections,omitempty"`
 	//RequestTimeout  *int    `json:"httpRequestTimeout,omitempty"`
 	//CaCert          *string `json:"caCert,omitempty"`

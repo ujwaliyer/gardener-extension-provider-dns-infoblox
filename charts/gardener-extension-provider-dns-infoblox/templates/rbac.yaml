@@ -47,7 +47,7 @@ rules:
   resources:
   - leases
   resourceNames:
-  - dns-provider-cloudflare-leader-election
+  - dns-provider-infoblox-leader-election
   verbs:
   - get
   - watch

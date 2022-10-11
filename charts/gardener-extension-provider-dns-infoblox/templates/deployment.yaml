@@ -36,7 +36,7 @@ spec:
         image: {{ include "image" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command:
-        - /gardener-extension-provider-dns-cloudflare
+        - /gardener-extension-provider-dns-infoblox
         - --leader-election-resource-lock={{ .Values.leaderElection.resourceLock }}
         - --config-file=/etc/{{ include "name" . }}/config/config.yaml
         - --dnsrecord-max-concurrent-reconciles={{ .Values.controllers.dnsrecord.concurrentSyncs }}

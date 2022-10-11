@@ -30,6 +30,7 @@ import (
 	reconcilerutils "github.com/gardener/gardener/pkg/controllerutils/reconciler"
 	kutil "github.com/gardener/gardener/pkg/utils/kubernetes"
 	"github.com/go-logr/logr"
+	types "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -70,8 +71,12 @@ func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRec
 	a.logger.Info("Creating or updating DNS recordset", "managedZone", managedZone, "name", dns.Spec.Name, "type", dns.Spec.RecordType, "rrdatas", dns.Spec.Values, "dnsrecord", kutil.ObjectName(dns))
 
 	// getting providerConfig specs
+	specs, err := a.GetDNSRecordValues(dns)
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	if err := dnsClient.CreateOrUpdateRecordSet(ctx, dns.Spec.view, managedZone, dns.Spec.Name, string(dns.Spec.RecordType), dns.Spec.Values, ttl); err != nil {
+	if err := dnsClient.CreateOrUpdateRecordSet(ctx, specs.View, managedZone, dns.Spec.Name, string(dns.Spec.RecordType), dns.Spec.Values, ttl); err != nil {
 		return &reconcilerutils.RequeueAfterError{
 			Cause:        fmt.Errorf("could not create or update DNS recordset in managed zone %s with name %s, type %s, and rrdatas %v: %+v", managedZone, dns.Spec.Name, dns.Spec.RecordType, dns.Spec.Values, err),
 			RequeueAfter: requeueAfterOnProviderError,
@@ -177,3 +182,22 @@ func lookupHosts(hostname string) ([]string, []string, error) {
 	return ipv4addrs, ipv6addrs, nil
 }
 */
+
+func (a *actuator) GetDNSRecordValues(
+	//_ context.Context,
+	dns *extensionsv1alpha1.DNSRecord,
+	//cluster *extensionscontroller.Cluster,
+	//secretsReader secretsmanager.Reader,
+	//checksums map[string]string,
+	//scaledDown bool,
+) (map[string]interface{}, error) {
+	// Decode providerConfig
+	cpConfig := &types.ProviderConfigManager{}
+	if dns.Spec.ProviderConfig != nil {
+		if _, _, err := a.Decoder().Decode(dns.Spec.ProviderConfig.Raw, nil, cpConfig); err != nil {
+			return cpConfig, fmt.Errorf("could not decode providerConfig of dnsrecord '%s': %w", kutil.ObjectName(dns), err)
+		}
+	}
+
+	return cpConfig
+}

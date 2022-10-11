@@ -31,7 +31,7 @@ type Record interface {
 
 type RecordA ibclient.RecordA
 
-func (r *RecordA) GetType() string          { return type_A }
+func (r *RecordA) GetType() string          { return Type_A }
 func (r *RecordA) GetId() string            { return r.Ref }
 func (r *RecordA) GetDNSName() string       { return r.Name }
 func (r *RecordA) GetSetIdentifier() string { return "" }
@@ -49,7 +49,7 @@ func (r *RecordA) PrepareUpdate() Base_Record {
 
 type RecordAAAA ibclient.RecordAAAA
 
-func (r *RecordAAAA) GetType() string          { return type_A }
+func (r *RecordAAAA) GetType() string          { return Type_A }
 func (r *RecordAAAA) GetId() string            { return r.Ref }
 func (r *RecordAAAA) GetDNSName() string       { return r.Name }
 func (r *RecordAAAA) GetSetIdentifier() string { return "" }
@@ -67,7 +67,7 @@ func (r *RecordAAAA) PrepareUpdate() Base_Record {
 
 type RecordCNAME ibclient.RecordCNAME
 
-func (r *RecordCNAME) GetType() string            { return type_CNAME }
+func (r *RecordCNAME) GetType() string            { return Type_CNAME }
 func (r *RecordCNAME) GetId() string              { return r.Ref }
 func (r *RecordCNAME) GetDNSName() string         { return r.Name }
 func (r *RecordCNAME) GetSetIdentifier() string   { return "" }
@@ -79,7 +79,7 @@ func (r *RecordCNAME) PrepareUpdate() Base_Record { n := *r; n.Zone = ""; n.View
 
 type RecordTXT ibclient.RecordTXT
 
-func (r *RecordTXT) GetType() string            { return type_TXT }
+func (r *RecordTXT) GetType() string            { return Type_TXT }
 func (r *RecordTXT) GetId() string              { return r.Ref }
 func (r *RecordTXT) GetDNSName() string         { return r.Name }
 func (r *RecordTXT) GetSetIdentifier() string   { return "" }

@@ -14,7 +14,8 @@ import (
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	ibclient1 "github.com/infobloxopen/infoblox-go-client"
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
-	infoblox "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/infoblox"
+
+	// infoblox "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/infoblox"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -31,11 +32,7 @@ type dnsClient struct {
 	client ibclient.IBConnector
 }
 
-<<<<<<< HEAD
-type RecordSet []infoblox.Base_Record
-=======
 type RecordSet []raw.Base_Record
->>>>>>> client-integration
 
 type InfobloxConfig struct {
 	Host            *string `json:"host,omitempty"`
@@ -215,11 +212,7 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, record_type
 
 	for _, rec := range records {
 		if rec.GetId() != "" {
-<<<<<<< HEAD
-			err := c.DeleteRecord(rec.(infoblox.Record), zone)
-=======
 			err := c.DeleteRecord(rec.(raw.Record), zone)
->>>>>>> client-integration
 			if err != nil {
 				return err
 			}
@@ -229,61 +222,35 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, record_type
 }
 
 // create DNS record for the Infoblox DDI setup
-<<<<<<< HEAD
-func (c *dnsClient) NewRecord(name string, view string, zone string, value string, ttl int64, record_type string) (record infoblox.Record) {
-
-	switch record_type {
-	case infoblox.Type_A:
-=======
 func (c *dnsClient) NewRecord(name string, view string, zone string, value string, ttl int64, record_type string) (record raw.Record) {
 
 	switch record_type {
 	case raw.Type_A:
->>>>>>> client-integration
 		r := ibclient.NewEmptyRecordA()
 		r.View = view
 		r.Name = name
 		r.Ipv4Addr = value
 		r.Ttl = uint32(ttl)
-<<<<<<< HEAD
-		record = (*infoblox.RecordA)(r)
-	case infoblox.Type_AAAA:
-=======
 		record = (*raw.RecordA)(r)
 	case raw.Type_AAAA:
->>>>>>> client-integration
 		r := ibclient.NewEmptyRecordAAAA()
 		r.View = view
 		r.Name = name
 		r.Ipv6Addr = value
 		r.Ttl = uint32(ttl)
-<<<<<<< HEAD
-		record = (*infoblox.RecordAAAA)(r)
-	case infoblox.Type_CNAME:
-=======
 		record = (*raw.RecordAAAA)(r)
 	case raw.Type_CNAME:
->>>>>>> client-integration
 		r := ibclient.NewEmptyRecordCNAME()
 		r.View = view
 		r.Name = name
 		r.Canonical = value
 		r.Ttl = uint32(ttl)
-<<<<<<< HEAD
-		record = (*infoblox.RecordCNAME)(r)
-	case infoblox.Type_TXT:
-		if n, err := strconv.Unquote(value); err == nil && !strings.Contains(value, " ") {
-			value = n
-		}
-		record = (*infoblox.RecordTXT)(ibclient.NewRecordTXT(ibclient.RecordTXT{
-=======
 		record = (*raw.RecordCNAME)(r)
 	case raw.Type_TXT:
 		if n, err := strconv.Unquote(value); err == nil && !strings.Contains(value, " ") {
 			value = n
 		}
 		record = (*raw.RecordTXT)(ibclient.NewRecordTXT(ibclient.RecordTXT{
->>>>>>> client-integration
 			Name: name,
 			Text: value,
 			View: view,
@@ -293,22 +260,14 @@ func (c *dnsClient) NewRecord(name string, view string, zone string, value strin
 	return
 }
 
-<<<<<<< HEAD
-func (c *dnsClient) CreateRecord(r infoblox.Record, zone string) error {
-=======
 func (c *dnsClient) CreateRecord(r raw.Record, zone string) error {
->>>>>>> client-integration
 
 	_, err := c.client.CreateObject(r.(ibclient.IBObject))
 	return err
 
 }
 
-<<<<<<< HEAD
-func (c *dnsClient) DeleteRecord(record infoblox.Record, zone string) error {
-=======
 func (c *dnsClient) DeleteRecord(record raw.Record, zone string) error {
->>>>>>> client-integration
 
 	_, err := c.client.DeleteObject(record.GetId())
 
@@ -324,11 +283,7 @@ func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordS
 
 	results := c.client.(*ibclient.Connector)
 
-<<<<<<< HEAD
-	if record_type != infoblox.Type_TXT {
-=======
 	if record_type != raw.Type_TXT {
->>>>>>> client-integration
 		return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
 	}
 
@@ -359,11 +314,7 @@ func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordS
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	rs := []infoblox.RecordTXT{}
-=======
 	rs := []raw.RecordTXT{}
->>>>>>> client-integration
 	err = json.Unmarshal(resp, &rs)
 	if err != nil {
 		return nil, err

@@ -49,7 +49,11 @@ func (r *RecordA) PrepareUpdate() Base_Record {
 
 type RecordAAAA ibclient.RecordAAAA
 
+<<<<<<< HEAD
 func (r *RecordAAAA) GetType() string          { return Type_A }
+=======
+func (r *RecordAAAA) GetType() string          { return Type_AAAA }
+>>>>>>> client-integration
 func (r *RecordAAAA) GetId() string            { return r.Ref }
 func (r *RecordAAAA) GetDNSName() string       { return r.Name }
 func (r *RecordAAAA) GetSetIdentifier() string { return "" }

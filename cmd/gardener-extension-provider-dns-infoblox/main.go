@@ -26,7 +26,7 @@ import (
 
 func main() {
 	runtimelog.SetLogger(logger.ZapLogger(false))
-	cmd := app.NewControllerManagerCommand(signals.SetupSignalHandler())
+	cmd := app.NewControllerManagerCommand(signals.SetupSignalHandler())1
 
 	if err := cmd.Execute(); err != nil {
 		runtimelog.Log.Error(err, "error executing the main controller command")

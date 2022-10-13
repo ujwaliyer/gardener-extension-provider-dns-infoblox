@@ -32,7 +32,7 @@ import (
 	"github.com/go-logr/logr"
 
 	// types "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config/v1alpha1"
-	ib_api "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/infoblox"
+
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -73,12 +73,12 @@ func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRec
 	a.logger.Info("Creating or updating DNS recordset", "managedZone", managedZone, "name", dns.Spec.Name, "type", dns.Spec.RecordType, "rrdatas", dns.Spec.Values, "dnsrecord", kutil.ObjectName(dns))
 
 	// getting providerConfig specs
-	specs, err := ib_api.GetDNSRecordValues(dns)
-	if err != nil {
-		fmt.Println(err)
-	}
+	// specs, err := ib_api.GetDNSRecordValues(dns)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
 
-	if err := dnsClient.CreateOrUpdateRecordSet(ctx, specs.View, managedZone, dns.Spec.Name, string(dns.Spec.RecordType), dns.Spec.Values, ttl); err != nil {
+	if err := dnsClient.CreateOrUpdateRecordSet(ctx, "default", managedZone, dns.Spec.Name, string(dns.Spec.RecordType), dns.Spec.Values, ttl); err != nil {
 		return &reconcilerutils.RequeueAfterError{
 			Cause:        fmt.Errorf("could not create or update DNS recordset in managed zone %s with name %s, type %s, and rrdatas %v: %+v", managedZone, dns.Spec.Name, dns.Spec.RecordType, dns.Spec.Values, err),
 			RequeueAfter: requeueAfterOnProviderError,

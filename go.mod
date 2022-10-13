@@ -11,7 +11,6 @@ require (
 	github.com/infobloxopen/infoblox-go-client/v2 v2.1.1
 	github.com/onsi/ginkgo/v2 v2.1.6
 	github.com/onsi/gomega v1.20.1
-	github.com/schrodit/gardener-extension-provider-dns-cloudflare v0.0.2
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/tools v0.1.13-0.20220803210227-8b9a1fbdf5c3

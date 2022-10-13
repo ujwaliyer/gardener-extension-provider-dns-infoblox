@@ -1,4 +1,4 @@
-// package infoblox
+package infoblox
 
 // import (
 // 	"fmt"

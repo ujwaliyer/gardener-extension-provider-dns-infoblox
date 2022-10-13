@@ -39,7 +39,7 @@ metadata:
   namespace: shoot--foobar--gcp
 spec:
   providerConfig:
-    view: default
+    # view: default
   type: infoblox-dns
   secretRef:
     name: dnsrecord-external

@@ -64,6 +64,12 @@ func (ib *InfobloxConfig) fillDefaultDetails() error {
 		return fmt.Errorf("no valid value for view")
 	}
 
+	if ib.PoolConnections == nil {
+		*ib.PoolConnections = 60
+	} else {
+		return fmt.Errorf("no valid value for no. of pool connections")
+	}
+
 	return nil
 }
 
@@ -71,10 +77,6 @@ func (ib *InfobloxConfig) fillDefaultDetails() error {
 func NewDNSClient(ctx context.Context, username string, password string, host string) (DNSClient, error) {
 
 	infobloxConfig := &InfobloxConfig{}
-
-	// var dns *extensionsv1alpha1.DNSRecord
-
-	// spec, err := providerconfig.GetDNSRecordValues(dns)
 
 	// define hostConfig
 	hostConfig := ibclient.HostConfig{

@@ -67,6 +67,8 @@ func NewDNSClient(ctx context.Context, username string, password string, host st
 	}
 
 	verify := "true"
+
+	// infobloxConfig.SSLVerify = dns.S
 	if infobloxConfig.SSLVerify != nil {
 		verify = strconv.FormatBool(*infobloxConfig.SSLVerify)
 	}

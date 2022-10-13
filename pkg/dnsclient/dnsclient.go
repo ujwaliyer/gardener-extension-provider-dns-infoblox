@@ -14,8 +14,6 @@ import (
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	ibclient1 "github.com/infobloxopen/infoblox-go-client"
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
-
-	// infoblox "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/infoblox"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -47,6 +45,28 @@ type InfobloxConfig struct {
 	ProxyURL        *string `json:"proxyUrl,omitempty"`
 }
 
+func (ib *InfobloxConfig) fillDefaultDetails() error {
+	if ib.RequestTimeout == nil {
+		*ib.RequestTimeout = 60
+	} else {
+		return fmt.Errorf("no valid value for RequestTimeout")
+	}
+
+	if ib.Version == nil {
+		*ib.Version = "2.10"
+	} else {
+		return fmt.Errorf("no valid value for API version")
+	}
+
+	if ib.View == nil {
+		*ib.View = "default"
+	} else {
+		return fmt.Errorf("no valid value for view")
+	}
+
+	return nil
+}
+
 // NewDNSClient creates a new dns client based on the Infoblox config provided
 func NewDNSClient(ctx context.Context, username string, password string, host string) (DNSClient, error) {
 
@@ -66,9 +86,12 @@ func NewDNSClient(ctx context.Context, username string, password string, host st
 		Password: password,
 	}
 
-	verify := "true"
+	err := infobloxConfig.fillDefaultDetails()
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	// infobloxConfig.SSLVerify = dns.S
+	verify := "true"
 	if infobloxConfig.SSLVerify != nil {
 		verify = strconv.FormatBool(*infobloxConfig.SSLVerify)
 	}

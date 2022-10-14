@@ -4,4 +4,4 @@ metadata:
   name: {{ include "name" . }}
 value: 1000000000
 globalDefault: false
-description: "Priority class for the Gardener extension: provider-dns-cloudflare."
+description: "Priority class for the Gardener extension: provider-dns-infoblox."

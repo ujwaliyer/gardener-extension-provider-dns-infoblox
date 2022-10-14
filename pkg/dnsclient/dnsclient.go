@@ -88,6 +88,11 @@ func NewDNSClient(ctx context.Context, username string, password string, host st
 		Password: password,
 	}
 
+	err := infobloxConfig.fillDefaultDetails()
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	verify := "true"
 	if infobloxConfig.SSLVerify != nil {
 		verify = strconv.FormatBool(*infobloxConfig.SSLVerify)

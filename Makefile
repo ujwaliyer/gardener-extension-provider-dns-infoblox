@@ -13,8 +13,8 @@
 # limitations under the License.
 
 EXTENSION_PREFIX            := gardener-extension
-NAME                        := provider-dns-cloudflare
-REGISTRY                    := ghcr.io/schrodit
+NAME                        := provider-dns-infoblox
+REGISTRY                    := ghcr.io/ujwaliyer
 IMAGE_PREFIX                := $(REGISTRY)/gardener-extension-
 REPO_ROOT                   := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 HACK_DIR                    := $(REPO_ROOT)/hack

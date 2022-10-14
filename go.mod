@@ -7,7 +7,7 @@ require (
 	github.com/gardener/gardener v1.43.2
 	github.com/go-logr/logr v1.2.0
 	github.com/golang/mock v1.6.0
-	github.com/infobloxopen/infoblox-go-client v1.1.0
+	github.com/infobloxopen/infoblox-go-client v1.1.1
 	github.com/infobloxopen/infoblox-go-client/v2 v2.1.1
 	github.com/onsi/ginkgo/v2 v2.1.6
 	github.com/onsi/gomega v1.20.1
@@ -15,7 +15,6 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/tools v0.1.13-0.20220803210227-8b9a1fbdf5c3
-	golang.org/x/vuln v0.0.0-20220923181559-cbe0a6944b8b
 	k8s.io/api v0.23.3
 	k8s.io/apimachinery v0.23.3
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
@@ -126,6 +125,8 @@ require (
 
 replace (
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.11.0 // keep this value in sync with sigs.k8s.io/controller-runtime
+
+	github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient/test v1.0.0 => ../pkg/dnsclient/test
 	k8s.io/api => k8s.io/api v0.23.3
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.23.3
 	k8s.io/apimachinery => k8s.io/apimachinery v0.23.3

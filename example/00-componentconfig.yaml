@@ -1,5 +1,5 @@
 ---
-apiVersion: cloudflare.dns.provider.extensions.config.gardener.cloud/v1alpha1
+apiVersion: infoblox.dns.provider.extensions.config.gardener.cloud/v1alpha1
 kind: ControllerConfiguration
 clientConnection:
   acceptContentTypes: application/json

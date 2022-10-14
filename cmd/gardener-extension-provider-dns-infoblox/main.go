@@ -17,7 +17,7 @@ package main
 import (
 	"os"
 
-	// "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/cmd/gardener-extension-provider-dns-infoblox/app"
+	"github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/cmd/gardener-extension-provider-dns-infoblox/app"
 
 	"github.com/gardener/gardener/pkg/logger"
 	runtimelog "sigs.k8s.io/controller-runtime/pkg/log"
@@ -26,7 +26,7 @@ import (
 
 func main() {
 	runtimelog.SetLogger(logger.ZapLogger(false))
-	cmd := app.NewControllerManagerCommand(signals.SetupSignalHandler())
+	cmd := app.NewControllerManagerCommand(signals.SetupSignalHandler())1
 
 	if err := cmd.Execute(); err != nil {
 		runtimelog.Log.Error(err, "error executing the main controller command")

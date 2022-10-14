@@ -352,4 +352,4 @@ func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordS
 		rs2 = append(rs2, r.Copy())
 	}
 	return rs2, nil
-} 
+}

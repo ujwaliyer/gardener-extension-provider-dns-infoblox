@@ -1,6 +1,5 @@
 vendor/
 dev
-pkg/dnsclient
 
 
 .idea

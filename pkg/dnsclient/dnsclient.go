@@ -45,6 +45,34 @@ type InfobloxConfig struct {
 	ProxyURL        *string `json:"proxyUrl,omitempty"`
 }
 
+func (ib *InfobloxConfig) fillDefaultDetails() error {
+	if ib.RequestTimeout == nil {
+		*ib.RequestTimeout = 60
+	} else {
+		return fmt.Errorf("no valid value for RequestTimeout")
+	}
+
+	if ib.Version == nil {
+		*ib.Version = "2.10"
+	} else {
+		return fmt.Errorf("no valid value for API version")
+	}
+
+	if ib.View == nil {
+		*ib.View = "default"
+	} else {
+		return fmt.Errorf("no valid value for view")
+	}
+
+	if ib.PoolConnections == nil {
+		*ib.PoolConnections = 60
+	} else {
+		return fmt.Errorf("no valid value for no. of pool connections")
+	}
+
+	return nil
+}
+
 // NewDNSClient creates a new dns client based on the Infoblox config provided
 func NewDNSClient(ctx context.Context, username string, password string, host string) (DNSClient, error) {
 

@@ -6,6 +6,7 @@ metadata:
   namespace: shoot--foobar--gcp
 type: Opaque
 data:
+  view: default
 # username: base64(username)
 # password: base64(password) 
 ---
@@ -38,7 +39,6 @@ metadata:
   namespace: shoot--foobar--gcp
 spec:
   type: infoblox-dns
-  view: infoview
   secretRef:
     name: dnsrecord-external
     namespace: shoot--foobar--gcp

@@ -18,7 +18,7 @@ var _ = Describe("Dnsclient", func() {
 	var refCNAMEString string
 	var refTXTString string
 	var dnsView string = "default"
-	// var refString string = "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5leGFtcGxlLmFiYw:abc.example.com/default"
+	var refAString string
 
 	BeforeEach(func() {
 		conn := testInfoBlox.GetInfoBloxInstance()
@@ -55,6 +55,25 @@ var _ = Describe("Dnsclient", func() {
 			aTXTRecord, err := objMgr.CreateTXTRecord(recordName, "domain is assigned to the user", 0, dnsView)
 			refTXTString = aTXTRecord.Ref
 			Expect(aTXTRecord).NotTo(BeNil())
+			Expect(err).To(BeNil())
+		})
+
+		It("should create A record Object", func() {
+			recordName := "example.com"
+			netView := ""
+			// useTtl := false
+			// ttl := uint32(0)
+			// comment := "test CNAME record creation"
+			ea := make(ibclient.EA)
+			aRecord, err := objMgr.CreateARecord(netView, dnsView, recordName, "10.16.0.0/8", "10.16.1.2", ea)
+			refAString = aRecord.Ref
+			Expect(aRecord).NotTo(BeNil())
+			Expect(err).To(BeNil())
+		})
+
+		It("should delete expected A record Ref to DeleteObject", func() {
+			dARef, err := objMgr.DeleteARecord(refAString)
+			Expect(dARef).To(Equal(refAString))
 			Expect(err).To(BeNil())
 		})
 

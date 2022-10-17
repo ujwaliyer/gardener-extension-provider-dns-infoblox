@@ -1,7 +1,7 @@
 package integration
 
 import (
-	"fmt"
+	// "fmt"
 	ibclient "github.com/infobloxopen/infoblox-go-client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -13,9 +13,11 @@ import (
 var _ = Describe("Dnsclient", func() {
 
 	var objMgr *ibclient.ObjectManager
-	const hostAdd string = "abc.example.com"
+	const hostAdd string = "example.com"
 	var refString string
 	var refCNAMEString string
+	var refTXTString string
+	var dnsView string = "default"
 	// var refString string = "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5leGFtcGxlLmFiYw:abc.example.com/default"
 
 	BeforeEach(func() {
@@ -36,21 +38,34 @@ var _ = Describe("Dnsclient", func() {
 		})
 
 		It("should create CNAME record Object", func() {
-			canonical := "test-canonical.domain.com"
-			dnsView := "default"
+			canonical := "test-canonical.example.com"
 			recordName := "test.example.com"
-			useTtl := false
-			ttl := uint32(0)
-			comment := "test CNAME record creation"
+			// useTtl := false
+			// ttl := uint32(0)
+			// comment := "test CNAME record creation"
 			ea := make(ibclient.EA)
-			aCNAMERecord, err := objMgr.CreateCNAMERecord(dnsView, canonical, recordName, useTtl, ttl, comment, ea)
+			aCNAMERecord, err := objMgr.CreateCNAMERecord(canonical, recordName, dnsView, ea)
 			refCNAMEString = aCNAMERecord.Ref
+			Expect(aCNAMERecord).NotTo(BeNil())
 			Expect(err).To(BeNil())
-			Expect(err).NotTo(BeNil())
+		})
+
+		It("should create TXT record Object", func() {
+			recordName := "text.example.com"
+			aTXTRecord, err := objMgr.CreateTXTRecord(recordName, "domain is assigned to the user", 0, dnsView)
+			refTXTString = aTXTRecord.Ref
+			Expect(aTXTRecord).NotTo(BeNil())
+			Expect(err).To(BeNil())
+		})
+
+		It("should delete expected TXT record Ref to DeleteObject", func() {
+			dTXTRef, err := objMgr.DeleteTXTRecord(refTXTString)
+			Expect(dTXTRef).To(Equal(refTXTString))
+			Expect(err).To(BeNil())
 		})
 
 		It("should delete expected CNAME record Ref to DeleteObject", func() {
-			dCNAMERef, err = objMgr.DeleteCNAMERecord(refCNAMEString)
+			dCNAMERef, err := objMgr.DeleteCNAMERecord(refCNAMEString)
 			Expect(dCNAMERef).To(Equal(refCNAMEString))
 			Expect(err).To(BeNil())
 		})

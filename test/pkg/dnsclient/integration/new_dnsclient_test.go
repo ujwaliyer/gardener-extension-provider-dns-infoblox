@@ -1,17 +1,17 @@
 package integration
 
 import (
-	// "fmt"
+	"fmt"
 	// ibclient "github.com/infobloxopen/infoblox-go-client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	// dnsInfoBlox "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient"
+	dnsInfoBlox "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient"
 )
 
 var _ = Describe("NewDnsclient", func() {
 
 	BeforeEach(func() {
-		// infobloxConfig := dnsInfoBlox.&InfobloxConfig{}
+		// infobloxConfig := dnsInfoBlox.InfobloxConfig{}
 		// Host := "10.16.198.191"
 		// Port := 443
 		// SSLVerify := false
@@ -47,19 +47,19 @@ var _ = Describe("NewDnsclient", func() {
 		// 	ProxyURL:        nil,
 		// }
 		// dnsC, err := dnsInfoBlox.NewDNSClient(nil, "admin", "infoblox", Host)
-		// // Accessing struct fields using the dot operator
+		// Accessing struct fields using the dot operator
 		// fmt.Println("Car Name: ", c)
 		// fmt.Println("Car Color: ", dnsC)
 		// fmt.Println(err)
 
 		// conn := dnsInfoBlox.GetInfoBloxInstance()
-		// objMgr := ibclient.NewObjectManager(connec, "VMWare", "")
+		// objMgr := ibclient.NewObjectManager(dnsC, "VMWare", "")
+		// fmt.Println("Car Color: ", objMgr)
 	})
-	Context("with connect api ", func() {
-		It("should get the Zone Auth", func() {
-			// zoneAuth := objMgr.GetZoneAuth()
-			// fmt.Println(conn)
-			Expect("abc").To(Equal("abc"))
-		})
+	// Context("with connect api ", func() {
+	It("should fill details and return nil ----", func() {
+		err := dnsInfoBlox.fillDefaultDetails()
+		Expect(err).To(BeNil())
 	})
+	// })
 })

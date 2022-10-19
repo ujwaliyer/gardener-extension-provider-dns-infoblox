@@ -45,38 +45,31 @@ type InfobloxConfig struct {
 	ProxyURL        *string `json:"proxyUrl,omitempty"`
 }
 
-func (ib *InfobloxConfig) fillDefaultDetails() error {
-	if ib.RequestTimeout == nil {
-		*ib.RequestTimeout = 60
-	} else {
-		return fmt.Errorf("no valid value for RequestTimeout")
-	}
+func assignDefaultValues() (InfobloxConfig, error) {
 
-	if ib.Version == nil {
-		*ib.Version = "2.10"
-	} else {
-		return fmt.Errorf("no valid value for API version")
-	}
+	port := 443
+	view := "default"
+	poolConnections := 10
+	requestTimeout := 60
+	version := "2.10"
 
-	if ib.View == nil {
-		*ib.View = "default"
-	} else {
-		return fmt.Errorf("no valid value for view")
-	}
+	return InfobloxConfig{
+		Port:            &port,
+		View:            &view,
+		PoolConnections: &poolConnections,
+		RequestTimeout:  &requestTimeout,
+		Version:         &version,
+	}, nil
 
-	if ib.PoolConnections == nil {
-		*ib.PoolConnections = 60
-	} else {
-		return fmt.Errorf("no valid value for no. of pool connections")
-	}
-
-	return nil
 }
 
 // NewDNSClient creates a new dns client based on the Infoblox config provided
 func NewDNSClient(ctx context.Context, username string, password string, host string) (DNSClient, error) {
 
-	infobloxConfig := &InfobloxConfig{}
+	infobloxConfig, err := assignDefaultValues()
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	// define hostConfig
 	hostConfig := ibclient.HostConfig{
@@ -88,12 +81,8 @@ func NewDNSClient(ctx context.Context, username string, password string, host st
 		Password: password,
 	}
 
-	err := infobloxConfig.fillDefaultDetails()
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	verify := "true"
+	// verify := "true"
+	verify := "false"
 	if infobloxConfig.SSLVerify != nil {
 		verify = strconv.FormatBool(*infobloxConfig.SSLVerify)
 	}
@@ -163,8 +152,11 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 // their user assigned resource names.
 func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, error) {
 
-	// dummy code for testing; might remove later
-	infobloxConfig := &InfobloxConfig{}
+	// populate default values
+	infobloxConfig, err := assignDefaultValues()
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	// define hostConfig
 	hostConfig := ibclient1.HostConfig{

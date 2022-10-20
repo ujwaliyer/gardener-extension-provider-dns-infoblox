@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
-	ibclient1 "github.com/infobloxopen/infoblox-go-client"
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -150,51 +149,41 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
-func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, error) {
+func (c *dnsClient) GetManagedZones(ctx context.Context, host string) (map[string]string, error) {
 
-	// populate default values
-	infobloxConfig, err := assignDefaultValues()
+	conn := c.client.(*ibclient.Connector)
+
+	rt := ibclient.NewZoneAuth(ibclient.ZoneAuth{})
+	// urlStr := conn.RequestBuilder.BuildUrl(ibclient.GET, "allrecords", [], "", &ibclient.QueryParams{})
+	urlStr := conn.RequestBuilder.BuildUrl(ibclient.GET, rt.ObjectType(), "", rt.ReturnFields(), &ibclient.QueryParams{})
+
+	req, err := http.NewRequest("GET", urlStr, new(bytes.Buffer))
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	// define hostConfig
-	hostConfig := ibclient1.HostConfig{
-		Host:    *infobloxConfig.Host,
-		Port:    strconv.Itoa(*infobloxConfig.Port),
-		Version: *infobloxConfig.Version,
-	}
-	verify := "false"
+	req.Header.Set("Content-Type", "application/json")
+	req.SetBasicAuth(conn.HostConfig.Username, conn.HostConfig.Password)
 
-	// define transportConfig
-	transportConfig := ibclient1.NewTransportConfig(verify, *infobloxConfig.RequestTimeout, *infobloxConfig.PoolConnections)
-
-	var requestBuilder ibclient1.HttpRequestBuilder = &ibclient1.WapiRequestBuilder{}
-
-	dns_client1, err := ibclient1.NewConnector(hostConfig, transportConfig, requestBuilder, &ibclient1.WapiHttpRequestor{})
+	resp, err := conn.Requestor.SendRequest(req)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	// get all zones; need separate connector for using this function
-	objMgr := ibclient1.NewObjectManager(dns_client1, "VMWare", "")
-
-	// todo: getzoneauth only supported in v1; record creation needs v2; what to do?
-	all_zones, err := objMgr.GetZoneAuth()
+	rs := []ibclient.ZoneAuth{}
+	err = json.Unmarshal(resp, &rs)
 	if err != nil {
-		// fmt.Println(err)
-		return nil, err
+		fmt.Println(err)
 	}
 
-	// var zone_list []string
-	zone_list := make(map[string]string)
+	ZoneList := make(map[string]string)
 
-	for _, zone := range all_zones {
+	for _, zone := range rs {
 		// zone_list = append(zone_list, zone.Fqdn)
-		zone_list[zone.Ref] = zone.Fqdn
+		ZoneList[zone.Ref] = zone.Fqdn
 	}
 
-	return zone_list, nil
+	return ZoneList, nil
 }
 
 // CreateOrUpdateRecordSet creates or updates the resource recordset with the given name, record type, rrdatas, and ttl

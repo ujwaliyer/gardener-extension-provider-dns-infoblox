@@ -149,7 +149,7 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 
 // GetManagedZones returns a map of all managed zone DNS names mapped to their IDs, composed of the project ID and
 // their user assigned resource names.
-func (c *dnsClient) GetManagedZones(ctx context.Context, host string) (map[string]string, error) {
+func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, error) {
 
 	conn := c.client.(*ibclient.Connector)
 

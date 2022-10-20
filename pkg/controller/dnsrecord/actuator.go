@@ -30,7 +30,7 @@ import (
 	reconcilerutils "github.com/gardener/gardener/pkg/controllerutils/reconciler"
 	kutil "github.com/gardener/gardener/pkg/utils/kubernetes"
 	"github.com/go-logr/logr"
-	corev1 "k8s.io/api/core/v1"
+	// corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -69,14 +69,14 @@ func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRec
 	// Create or update DNS recordset
 	ttl := extensionsv1alpha1helper.GetDNSRecordTTL(dns.Spec.TTL)
 	a.logger.Info("Creating or updating DNS recordset", "managedZone", managedZone, "name", dns.Spec.Name, "type", dns.Spec.RecordType, "rrdatas", dns.Spec.Values, "dnsrecord", kutil.ObjectName(dns))
-	secret, err := extensionscontroller.GetSecretByReference(ctx, c, dns.Spec.SecretRef)
+	secret, err := extensionscontroller.GetSecretByReference(ctx, a.Client(), &dns.Spec.SecretRef)
 	if err != nil {
 		return nil, err
 	}
 
 	view, ok := secret.Data["view"]
 	if !ok {
-		return nil, fmt.Errorf("No view found")
+		return fmt.Errorf("No view found")
 	}
 	if err := dnsClient.CreateOrUpdateRecordSet(ctx, view, managedZone, dns.Spec.Name, string(dns.Spec.RecordType), dns.Spec.Values, ttl); err != nil {
 		return &reconcilerutils.RequeueAfterError{

@@ -31,3 +31,22 @@ type ControllerConfiguration struct {
 	// +optional
 	ClientConnection *componentbaseconfigv1alpha1.ClientConnectionConfiguration `json:"clientConnection,omitempty"`
 }
+
+// ProviderConfigManager contains configurations settings for the providerconfig.
+type ProviderConfigManager struct {
+	metav1.TypeMeta `json:",inline"`
+	// Hosts contains information about the Host ip
+	Host *string `json:"host,omitempty"`
+
+	// View Contains Information about the view parameter fo infoblox config used to pass to infoblox dns client
+	View *string `json:"view,omitempty"`
+
+	//Port            *int    `json:"port,omitempty"`
+	//SSLVerify       *bool   `json:"sslVerify,omitempty"`
+	//Version         *string `json:"version,omitempty"`
+	//PoolConnections *int    `json:"httpPoolConnections,omitempty"`
+	//RequestTimeout  *int    `json:"httpRequestTimeout,omitempty"`
+	//CaCert          *string `json:"caCert,omitempty"`
+	//MaxResults      int     `json:"maxResults,omitempty"`
+	//ProxyURL        *string `json:"proxyUrl,omitempty"`
+}

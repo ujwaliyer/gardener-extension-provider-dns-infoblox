@@ -5,10 +5,12 @@ This is an extension developed for using the Infoblox DNS service as a provider,
 # local run test suite
 
 after cloning the project
-go mod tidy
+
+**go mod tidy**
 
 then
 
-go mod vendor
+**go mod vendor**
 
-ginkgo test/pkg/dnsclient/integration/
+
+**ginkgo test/pkg/dnsclient/integration/**

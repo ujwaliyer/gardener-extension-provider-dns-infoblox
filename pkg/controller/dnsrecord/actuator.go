@@ -30,6 +30,8 @@ import (
 	reconcilerutils "github.com/gardener/gardener/pkg/controllerutils/reconciler"
 	kutil "github.com/gardener/gardener/pkg/utils/kubernetes"
 	"github.com/go-logr/logr"
+
+	// corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -68,7 +70,16 @@ func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRec
 	// Create or update DNS recordset
 	ttl := extensionsv1alpha1helper.GetDNSRecordTTL(dns.Spec.TTL)
 	a.logger.Info("Creating or updating DNS recordset", "managedZone", managedZone, "name", dns.Spec.Name, "type", dns.Spec.RecordType, "rrdatas", dns.Spec.Values, "dnsrecord", kutil.ObjectName(dns))
-	if err := dnsClient.CreateOrUpdateRecordSet(ctx, dns.Spec.view, managedZone, dns.Spec.Name, string(dns.Spec.RecordType), dns.Spec.Values, ttl); err != nil {
+	secret, err := extensionscontroller.GetSecretByReference(ctx, a.Client(), &dns.Spec.SecretRef)
+	if err != nil {
+		return err
+	}
+
+	view, ok := secret.Data["view"]
+	if !ok {
+		return fmt.Errorf("No view found")
+	}
+	if err := dnsClient.CreateOrUpdateRecordSet(ctx, string(view), managedZone, dns.Spec.Name, string(dns.Spec.RecordType), dns.Spec.Values, ttl); err != nil {
 		return &reconcilerutils.RequeueAfterError{
 			Cause:        fmt.Errorf("could not create or update DNS recordset in managed zone %s with name %s, type %s, and rrdatas %v: %+v", managedZone, dns.Spec.Name, dns.Spec.RecordType, dns.Spec.Values, err),
 			RequeueAfter: requeueAfterOnProviderError,
@@ -124,7 +135,7 @@ func (a *actuator) Restore(ctx context.Context, dns *extensionsv1alpha1.DNSRecor
 }
 
 // Migrate migrates the DNSRecord.
-func (a *actuator) Migrate(context.Context, *extensionsv1alpha1.DNSRecord, *extensionscontroller.Cluster) error {
+func (a *actuator) Migrate(ctx context.Context, dns *extensionsv1alpha1.DNSRecord, cluster *extensionscontroller.Cluster) error {
 	return nil
 }
 

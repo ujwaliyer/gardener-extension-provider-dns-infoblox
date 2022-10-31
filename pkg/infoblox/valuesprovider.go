@@ -1,13 +1,9 @@
 package infoblox
 
 import (
-	"fmt"
-
 	"github.com/gardener/gardener/extensions/pkg/controller/common"
-	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
-	kutil "github.com/gardener/gardener/pkg/utils/kubernetes"
 	"github.com/go-logr/logr"
-	types "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config/v1alpha1/types"
+	// types "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config/v1alpha1/types"
 	//"github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/controller/dnsrecord/actuator"
 )
 
@@ -16,24 +12,24 @@ type actuator struct {
 	logger logr.Logger
 }
 
-func (a *actuator) GetControlPlaneChartValues(
-	//_ context.Context,
-	dns *extensionsv1alpha1.DNSRecord,
-	//cluster *extensionscontroller.Cluster,
-	//secretsReader secretsmanager.Reader,
-	//checksums map[string]string,
-	//scaledDown bool,
-) (map[string]interface{}, error) {
-	// Decode providerConfig
-	cpConfig := &types.ProviderConfigManager{}
-	if dns.Spec.ProviderConfig != nil {
-		if _, _, err := a.Decoder().Decode(dns.Spec.ProviderConfig.Raw, nil, cpConfig); err != nil {
-			return nil, fmt.Errorf("could not decode providerConfig of dnsrecord '%s': %w", kutil.ObjectName(dns), err)
-		}
-	}
+// func (a *actuator) GetControlPlaneChartValues(
+// 	//_ context.Context,
+// 	dns *extensionsv1alpha1.DNSRecord,
+// 	//cluster *extensionscontroller.Cluster,
+// 	//secretsReader secretsmanager.Reader,
+// 	//checksums map[string]string,
+// 	//scaledDown bool,
+// ) (map[string]interface{}, error) {
+// 	// Decode providerConfig
+// 	cpConfig := &types.ProviderConfigManager{}
+// 	if dns.Spec.ProviderConfig != nil {
+// 		if _, _, err := a.Decoder().Decode(dns.Spec.ProviderConfig.Raw, nil, cpConfig); err != nil {
+// 			return nil, fmt.Errorf("could not decode providerConfig of dnsrecord '%s': %w", kutil.ObjectName(dns), err)
+// 		}
+// 	}
 
-	return cpConfig
-}
+// 	return cpConfig
+// }
 
 /*
 func ExtractCredentials(cpConfig struct) (*Credentials, error) {

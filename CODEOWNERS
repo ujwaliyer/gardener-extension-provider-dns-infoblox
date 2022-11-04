@@ -1,2 +1,6 @@
-# gardener-extension-provider-gcp maintainers
-*   @gardener/gardener-extension-provider-gcp-maintainers @gardener/gardener-maintainers
+# gardener-extension-provider-dns-infoblox maintainers
+*   @ujwaliyer @harshcommits
+
+*.go @harshcommits @ujwaliyer
+
+/test @mayankraipure11

@@ -9,7 +9,9 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
+
+	raw "dnsclient-poc/raw/records"
+	ibclient "dnsclient-poc/vendor/github.com/infobloxopen/infoblox-go-client/v2"
 
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
@@ -154,7 +156,6 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, err
 	conn := c.client.(*ibclient.Connector)
 
 	rt := ibclient.NewZoneAuth(ibclient.ZoneAuth{})
-	// urlStr := conn.RequestBuilder.BuildUrl(ibclient.GET, "allrecords", [], "", &ibclient.QueryParams{})
 	urlStr := conn.RequestBuilder.BuildUrl(ibclient.GET, rt.ObjectType(), "", rt.ReturnFields(), &ibclient.QueryParams{})
 
 	req, err := http.NewRequest("GET", urlStr, new(bytes.Buffer))
@@ -188,22 +189,25 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, err
 
 // CreateOrUpdateRecordSet creates or updates the resource recordset with the given name, record type, rrdatas, and ttl
 // in the managed zone with the given name or ID.
-func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error {
+func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, values []string, ttl int64) error {
 	records, err := c.GetRecordSet(name, record_type, zone)
 	if err != nil {
 		return err
 	}
 
-	err_del := c.DeleteRecordSet(ctx, zone, name, record_type)
-	if err_del != nil {
-		fmt.Println(err_del)
+	for _, r := range records {
+		if r.GetDNSName() == name {
+			err_del := c.DeleteRecord(r.(raw.Record), zone)
+			if err_del != nil {
+				return err_del
+			}
+		}
 	}
 
-	for _, r := range records {
-		r0 := c.NewRecord(r.GetDNSName(), view, zone, r.GetValue(), int64(r.GetTTL()), r.GetType())
-		err := c.CreateRecord(r0, zone)
+	for _, value := range values {
+		_, err := c.createRecord(name, view, value, ttl, record_type)
 		if err != nil {
-			fmt.Println(err)
+			return err
 		}
 	}
 
@@ -230,42 +234,45 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, record_type
 }
 
 // create DNS record for the Infoblox DDI setup
-func (c *dnsClient) NewRecord(name string, view string, zone string, value string, ttl int64, record_type string) (record raw.Record) {
+func (c *dnsClient) createRecord(name string, view string, value string, ttl int64, record_type string) (string, error) {
+
+	var record string
+	var err error
+	var rec ibclient.IBObject
 
 	switch record_type {
 	case raw.Type_A:
-		r := ibclient.NewEmptyRecordA()
-		r.View = view
-		r.Name = name
-		r.Ipv4Addr = value
-		r.Ttl = uint32(ttl)
-		record = (*raw.RecordA)(r)
+		rec = ibclient.NewRecordA(view, "", name, value, uint32(ttl), false, "", nil, "")
+		// record, err = c.client.CreateObject(rec)
+		// if err != nil {
+		// 	fmt.Println(err)
+		// }
 	case raw.Type_AAAA:
-		r := ibclient.NewEmptyRecordAAAA()
-		r.View = view
-		r.Name = name
-		r.Ipv6Addr = value
-		r.Ttl = uint32(ttl)
-		record = (*raw.RecordAAAA)(r)
+		rec = ibclient.NewRecordAAAA(view, name, value, false, uint32(ttl), "", nil, "")
+		// record, err = c.client.CreateObject(rec)
+		// if err != nil {
+		// 	fmt.Println(err)
+		// }
 	case raw.Type_CNAME:
-		r := ibclient.NewEmptyRecordCNAME()
-		r.View = view
-		r.Name = name
-		r.Canonical = value
-		r.Ttl = uint32(ttl)
-		record = (*raw.RecordCNAME)(r)
+		rec = ibclient.NewRecordCNAME(view, value, name, true, uint32(ttl), "", nil, "")
+		// record, err = c.client.CreateObject(rec)
+		// if err != nil {
+		// 	fmt.Println(err)
+		// }
 	case raw.Type_TXT:
-		if n, err := strconv.Unquote(value); err == nil && !strings.Contains(value, " ") {
-			value = n
-		}
-		record = (*raw.RecordTXT)(ibclient.NewRecordTXT(ibclient.RecordTXT{
+		rec = ibclient.NewRecordTXT(ibclient.RecordTXT{
 			Name: name,
-			Text: value,
 			View: view,
-		}))
+			Text: value,
+		})
 	}
 
-	return
+	record, err = c.client.CreateObject(rec)
+	if err != nil {
+		return "", err
+	}
+
+	return record, nil
 }
 
 func (c *dnsClient) CreateRecord(r raw.Record, zone string) error {

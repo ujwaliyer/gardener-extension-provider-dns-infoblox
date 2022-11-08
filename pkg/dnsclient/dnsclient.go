@@ -243,22 +243,13 @@ func (c *dnsClient) createRecord(name string, view string, value string, ttl int
 	switch record_type {
 	case raw.Type_A:
 		rec = ibclient.NewRecordA(view, "", name, value, uint32(ttl), false, "", nil, "")
-		// record, err = c.client.CreateObject(rec)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// }
+
 	case raw.Type_AAAA:
 		rec = ibclient.NewRecordAAAA(view, name, value, false, uint32(ttl), "", nil, "")
-		// record, err = c.client.CreateObject(rec)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// }
+
 	case raw.Type_CNAME:
 		rec = ibclient.NewRecordCNAME(view, value, name, true, uint32(ttl), "", nil, "")
-		// record, err = c.client.CreateObject(rec)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// }
+
 	case raw.Type_TXT:
 		rec = ibclient.NewRecordTXT(ibclient.RecordTXT{
 			Name: name,

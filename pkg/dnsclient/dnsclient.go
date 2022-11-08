@@ -263,17 +263,9 @@ func (c *dnsClient) createRecord(name string, view string, value string, ttl int
 	return record, nil
 }
 
-func (c *dnsClient) CreateRecord(r raw.Record, zone string) error {
-
-	_, err := c.client.CreateObject(r.(ibclient.IBObject))
-	return err
-
-}
-
 func (c *dnsClient) DeleteRecord(record raw.Record, zone string) error {
 
 	_, err := c.client.DeleteObject(record.GetId())
-
 	if err != nil {
 		return err
 	}

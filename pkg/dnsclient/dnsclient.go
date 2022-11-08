@@ -10,9 +10,6 @@ import (
 	"os"
 	"strconv"
 
-	raw "dnsclient-poc/raw/records"
-	ibclient "dnsclient-poc/vendor/github.com/infobloxopen/infoblox-go-client/v2"
-
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
 	corev1 "k8s.io/api/core/v1"

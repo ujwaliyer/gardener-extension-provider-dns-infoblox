@@ -1,7 +1,7 @@
 package integration
 
 import (
-	"fmt"
+	// "fmt"
 	// ibclient "github.com/infobloxopen/infoblox-go-client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -11,9 +11,12 @@ import (
 var _ = Describe("NewDnsclient", func() {
 	var dnsClient dnsInfoBlox.DNSClient
 	var zone map[string]string
+	var default_zone = "sujindar.com"
+	var user = "admin"
+	var password = "btprpc_infoblox"
 	BeforeEach(func() {
-		Host := "10.16.198.191"
-		dnsC, err := dnsInfoBlox.NewDNSClient(nil, "admin", "infoblox", Host)
+		Host := "10.16.198.17"
+		dnsC, err := dnsInfoBlox.NewDNSClient(nil, user, password, Host)
 		dnsClient = dnsC
 		Expect(dnsC).NotTo(BeNil())
 		Expect(err).To(BeNil())
@@ -21,7 +24,7 @@ var _ = Describe("NewDnsclient", func() {
 	Context("DNSClient go testing", func() {
 		It("GetManaged zone :", func() {
 			zones, err := dnsClient.GetManagedZones(nil)
-			Ω(zones).Should(ContainElement(ContainSubstring("btprpc.supportnix2.com"), &zone))
+			Ω(zones).Should(ContainElement(ContainSubstring(default_zone), &zone))
 			Expect(err).To(BeNil())
 		})
 		It("Should not create A record :", func() {

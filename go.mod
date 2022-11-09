@@ -128,6 +128,7 @@ replace (
 	github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient v1.0.0 => ../pkg/dnsclient
 
 	github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient/test v1.0.0 => ../pkg/dnsclient/test
+	github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient/test/v2 v2.0.0 => ../pkg/dnsclient/test/v2
 	k8s.io/api => k8s.io/api v0.23.3
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.23.3
 	k8s.io/apimachinery => k8s.io/apimachinery v0.23.3

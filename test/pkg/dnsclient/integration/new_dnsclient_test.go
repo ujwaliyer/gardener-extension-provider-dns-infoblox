@@ -14,6 +14,8 @@ var _ = Describe("NewDnsclient", func() {
 	var default_zone = "sujindar.com"
 	var user = "admin"
 	var password = "btprpc_infoblox"
+	var key string
+	var id_addr = []string{"10.16.2.13"}
 	BeforeEach(func() {
 		Host := "10.16.198.17"
 		dnsC, err := dnsInfoBlox.NewDNSClient(nil, user, password, Host)
@@ -25,36 +27,28 @@ var _ = Describe("NewDnsclient", func() {
 		It("GetManaged zone :", func() {
 			zones, err := dnsClient.GetManagedZones(nil)
 			Ω(zones).Should(ContainElement(ContainSubstring(default_zone), &zone))
-			Expect(err).To(BeNil())
-		})
-		It("Should not create A record :", func() {
-			var key string
 			for k := range zone {
 				key = k
 			}
-			var id_addr = []string{"10.16.2.13"}
+			Expect(err).To(BeNil())
+		})
+		It("Should not create A record :", func() {
 			err := dnsClient.CreateOrUpdateRecordSet(nil, "default", key, "example.com", "A", id_addr, 30)
 			Expect(err).NotTo(BeNil())
 		})
 		It("Should create TXT record :", func() {
-			var key string
-			for k := range zone {
-				key = k
-			}
-			var id_addr = []string{"10.16.2.13"}
-			err := dnsClient.CreateOrUpdateRecordSet(nil, "default", key, "txt.example.com", "TXT", id_addr, 30)
+			err := dnsClient.CreateOrUpdateRecordSet(nil, "default", key, "abcd-efgh"+"."+default_zone, "TXT", id_addr, 30)
 			Expect(err).To(BeNil())
 		})
 
 		It("Should create CNAME record :", func() {
-			var key string
-			for k := range zone {
-				key = k
-			}
-			var id_addr = []string{"10.16.2.13"}
-			//current dns client only create TXT records does not create CName record
 			err := dnsClient.CreateOrUpdateRecordSet(nil, "default", key, "txt.example.com", "CNAME", id_addr, 30)
 			Expect(err).NotTo(BeNil())
+		})
+
+		It("Should create TXT record :", func() {
+			err := dnsClient.DeleteRecordSet(nil, key, "abcd-efgh"+"."+default_zone, "TXT")
+			Expect(err).To(BeNil())
 		})
 	})
 })

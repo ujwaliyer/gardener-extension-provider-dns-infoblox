@@ -51,11 +51,11 @@ var _ = Describe("NewDnsclient", func() {
 			Expect(err).To(BeNil())
 		})
 		It("Should delete A record :", func() {
-			err := dnsClient.DeleteRecordSet(nil, key, "example"+"."+"btprpcinfoblox", "A")
+			err := dnsClient.DeleteRecordSet(nil, key, "example"+"."+"infobloxbtprpc", "A")
 			Expect(err).To(BeNil())
 		})
 		It("Should delete CNAME record :", func() {
-			err := dnsClient.DeleteRecordSet(nil, key, "example"+"."+"btprpcinfoblox.com", "CNAME")
+			err := dnsClient.DeleteRecordSet(nil, key, "def_cname"+"."+"infobloxbtprpc", "CNAME")
 			Expect(err).To(BeNil())
 		})
 	})

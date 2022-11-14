@@ -286,9 +286,9 @@ func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordS
 		var rt ibclient.IBObject
 
 		switch recordType {
-		case "A":
+		case "TXT":
 			rt = ibclient.NewRecordTXT(ibclient.RecordTXT{})
-		case "CNAME":
+		case "A":
 			rt = ibclient.NewEmptyRecordA()
 		}
 
@@ -330,6 +330,7 @@ func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordS
 			rs2 = append(rs2, r.Copy())
 		}
 		return rs2, nil
+
 	case raw.Type_A:
 		rs := []raw.RecordA{}
 		err = json.Unmarshal(resp, &rs)
@@ -342,6 +343,7 @@ func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordS
 			rs2 = append(rs2, r.Copy())
 		}
 		return rs2, nil
+
 	}
 
 	return nil, nil

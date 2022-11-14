@@ -3,6 +3,7 @@ package dnsclient
 import (
 	"bytes"
 	"context"
+	raw "dnsclient-poc/raw/records"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -20,7 +21,7 @@ import (
 
 type DNSClient interface {
 	GetManagedZones(ctx context.Context) (map[string]string, error)
-	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error
+	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, values []string, ttl int64) error
 	DeleteRecordSet(ctx context.Context, zone, name, recordType string) error
 }
 
@@ -282,8 +283,16 @@ func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordS
 		return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
 	}
 
-	execRequest := func(forceProxy bool) ([]byte, error) {
-		rt := ibclient.NewRecordTXT(ibclient.RecordTXT{})
+	execRequest := func(forceProxy bool, recordType string) ([]byte, error) {
+		var rt ibclient.IBObject
+
+		switch recordType {
+		case "A":
+			rt = ibclient.NewRecordTXT(ibclient.RecordTXT{})
+		case "CNAME":
+			rt = ibclient.NewEmptyRecordA()
+		}
+
 		urlStr := results.RequestBuilder.BuildUrl(ibclient.GET, rt.ObjectType(), "", rt.ReturnFields(), &ibclient.QueryParams{})
 		urlStr += "&name=" + name
 		if forceProxy {
@@ -299,25 +308,43 @@ func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordS
 		return results.Requestor.SendRequest(req)
 	}
 
-	resp, err := execRequest(false)
+	resp, err := execRequest(false, record_type)
 	if err != nil {
 		// Forcing the request to redirect to Grid Master by making forcedProxy=true
-		resp, err = execRequest(true)
+		resp, err = execRequest(true, record_type)
 		// fmt.Println(err)
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	rs := []raw.RecordTXT{}
-	err = json.Unmarshal(resp, &rs)
-	if err != nil {
-		return nil, err
+	switch record_type {
+	case raw.Type_TXT:
+		rs := []raw.RecordTXT{}
+		err = json.Unmarshal(resp, &rs)
+		if err != nil {
+			return nil, err
+		}
+
+		rs2 := RecordSet{}
+		for _, r := range rs {
+			rs2 = append(rs2, r.Copy())
+		}
+		return rs2, nil
+	case raw.Type_A:
+		rs := []raw.RecordA{}
+		err = json.Unmarshal(resp, &rs)
+		if err != nil {
+			return nil, err
+		}
+
+		rs2 := RecordSet{}
+		for _, r := range rs {
+			rs2 = append(rs2, r.Copy())
+		}
+		return rs2, nil
 	}
 
-	rs2 := RecordSet{}
-	for _, r := range rs {
-		rs2 = append(rs2, r.Copy())
-	}
-	return rs2, nil
+	return nil, nil
+
 }

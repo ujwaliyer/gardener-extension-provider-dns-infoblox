@@ -3,6 +3,7 @@ package dnsclient
 import (
 	"bytes"
 	"context"
+	raw "dnsclient-poc/raw/records"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -278,7 +279,7 @@ func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordS
 
 	results := c.client.(*ibclient.Connector)
 
-	if record_type != raw.Type_TXT {
+	if record_type != raw.Type_TXT || record_type != raw.Type_A {
 		return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
 	}
 

@@ -187,7 +187,7 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, err
 // CreateOrUpdateRecordSet creates or updates the resource recordset with the given name, record type, rrdatas, and ttl
 // in the managed zone with the given name or ID.
 func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, values []string, ttl int64) error {
-	records, err := c.GetRecordSet(name, record_type, zone)
+	records, err := c.GetRecordSet(zone)
 	if err != nil {
 		return err
 	}
@@ -214,7 +214,7 @@ func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, nam
 // DeleteRecordSet deletes the resource recordset with the given name and record type
 // in the managed zone with the given name or ID.
 func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, record_type string) error {
-	records, err := c.GetRecordSet(name, record_type, zone)
+	records, err := c.GetRecordSet(zone)
 	if err != nil {
 		return err
 	}
@@ -274,26 +274,22 @@ func (c *dnsClient) DeleteRecord(record raw.Record, zone string) error {
 
 }
 
-func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordSet, error) {
+func (c *dnsClient) GetRecordSet(zone string) (RecordSet, error) {
 
 	results := c.client.(*ibclient.Connector)
 
-	if record_type != raw.Type_TXT && record_type != raw.Type_A {
-		return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
-	}
+	// if record_type != raw.Type_TXT && record_type != raw.Type_A {
+	// 	return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
+	// }
 
-	execRequest := func(forceProxy bool, recordType string) ([]byte, error) {
-		var rt ibclient.IBObject
+	execRequest := func(forceProxy bool, zone string) ([]byte, error) {
 
-		switch recordType {
-		case "TXT":
-			rt = ibclient.NewRecordTXT(ibclient.RecordTXT{})
-		case "A":
-			rt = ibclient.NewEmptyRecordA()
-		}
+		record_map := make(map[string]string)
+		record_map["zone"] = zone
+		query_params := ibclient.NewQueryParams(false, record_map)
 
-		urlStr := results.RequestBuilder.BuildUrl(ibclient.GET, rt.ObjectType(), "", rt.ReturnFields(), &ibclient.QueryParams{})
-		urlStr += "&name=" + name
+		urlStr := results.RequestBuilder.BuildUrl(ibclient.GET, "allrecords", "", nil, query_params)
+		// urlStr += "&name=" + name
 		if forceProxy {
 			urlStr += "&_proxy_search=GM"
 		}
@@ -307,45 +303,26 @@ func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordS
 		return results.Requestor.SendRequest(req)
 	}
 
-	resp, err := execRequest(false, record_type)
+	resp, err := execRequest(false, zone)
 	if err != nil {
 		// Forcing the request to redirect to Grid Master by making forcedProxy=true
-		resp, err = execRequest(true, record_type)
+		resp, err = execRequest(true, zone)
 		// fmt.Println(err)
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	switch record_type {
-	case raw.Type_TXT:
-		rs := []raw.RecordTXT{}
-		err = json.Unmarshal(resp, &rs)
-		if err != nil {
-			return nil, err
-		}
-
-		rs2 := RecordSet{}
-		for _, r := range rs {
-			rs2 = append(rs2, r.Copy())
-		}
-		return rs2, nil
-
-	case raw.Type_A:
-		rs := []raw.RecordA{}
-		err = json.Unmarshal(resp, &rs)
-		if err != nil {
-			return nil, err
-		}
-
-		rs2 := RecordSet{}
-		for _, r := range rs {
-			rs2 = append(rs2, r.Copy())
-		}
-		return rs2, nil
-
+	rs := []raw.RecordTXT{}
+	err = json.Unmarshal(resp, &rs)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, nil
+	rs2 := RecordSet{}
+	for _, r := range rs {
+		rs2 = append(rs2, r.Copy())
+	}
+	return rs2, nil
 
 }

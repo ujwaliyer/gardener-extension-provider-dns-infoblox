@@ -3,7 +3,6 @@ package dnsclient
 import (
 	"bytes"
 	"context"
-	raw "dnsclient-poc/raw/records"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"

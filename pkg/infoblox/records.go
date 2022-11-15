@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	Type_A     = "A"
-	Type_CNAME = "CNAME"
-	Type_AAAA  = "AAAA"
-	Type_TXT   = "TXT"
+	Type_A     = "record:a"
+	Type_CNAME = "record:cname"
+	Type_AAAA  = "record:aaaa"
+	Type_TXT   = "record:txt"
 )
 
 type Base_Record interface {

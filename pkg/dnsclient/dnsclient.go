@@ -187,7 +187,9 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, err
 // CreateOrUpdateRecordSet creates or updates the resource recordset with the given name, record type, rrdatas, and ttl
 // in the managed zone with the given name or ID.
 func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, values []string, ttl int64) error {
-	records, err := c.GetRecordSet(zone)
+
+	records, err := c.GetRecordSet(zone, record_type)
+
 	if err != nil {
 		return err
 	}
@@ -214,7 +216,9 @@ func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, nam
 // DeleteRecordSet deletes the resource recordset with the given name and record type
 // in the managed zone with the given name or ID.
 func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, record_type string) error {
-	records, err := c.GetRecordSet(zone)
+
+	records, err := c.GetRecordSet(zone, record_type)
+
 	if err != nil {
 		return err
 	}
@@ -274,21 +278,31 @@ func (c *dnsClient) DeleteRecord(record raw.Record, zone string) error {
 
 }
 
-func (c *dnsClient) GetRecordSet(zone string) (RecordSet, error) {
+
+func (c *dnsClient) GetRecordSet(zone string, recordType string) (RecordSet, error) {
 
 	results := c.client.(*ibclient.Connector)
 
-	// if record_type != raw.Type_TXT && record_type != raw.Type_A {
-	// 	return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
-	// }
+	if recordType != raw.Type_TXT && recordType != raw.Type_A {
+		return nil, fmt.Errorf("record type %s not supported for GetRecord", recordType)
+	}
 
-	execRequest := func(forceProxy bool, zone string) ([]byte, error) {
-
+	execRequest := func(forceProxy bool, zone string, recordType string) ([]byte, error) {
+  
 		record_map := make(map[string]string)
 		record_map["zone"] = zone
 		query_params := ibclient.NewQueryParams(false, record_map)
 
-		urlStr := results.RequestBuilder.BuildUrl(ibclient.GET, "allrecords", "", nil, query_params)
+		var rec string
+
+		if recordType != "" {
+			rec = recordType
+		} else {
+			rec = "allrecords"
+		}
+
+		urlStr := results.RequestBuilder.BuildUrl(ibclient.GET, rec, "", nil, query_params)
+
 		// urlStr += "&name=" + name
 		if forceProxy {
 			urlStr += "&_proxy_search=GM"
@@ -303,11 +317,11 @@ func (c *dnsClient) GetRecordSet(zone string) (RecordSet, error) {
 		return results.Requestor.SendRequest(req)
 	}
 
-	resp, err := execRequest(false, zone)
+
+	resp, err := execRequest(false, zone, recordType)
 	if err != nil {
 		// Forcing the request to redirect to Grid Master by making forcedProxy=true
-		resp, err = execRequest(true, zone)
-		// fmt.Println(err)
+		resp, err = execRequest(true, zone, recordType)
 	}
 	if err != nil {
 		return nil, err
@@ -318,11 +332,11 @@ func (c *dnsClient) GetRecordSet(zone string) (RecordSet, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	rs2 := RecordSet{}
 	for _, r := range rs {
 		rs2 = append(rs2, r.Copy())
 	}
+
 	return rs2, nil
 
 }

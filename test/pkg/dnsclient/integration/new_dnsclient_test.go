@@ -46,8 +46,16 @@ var _ = Describe("NewDnsclient", func() {
 			Expect(err).NotTo(BeNil())
 		})
 
-		It("Should create TXT record :", func() {
-			err := dnsClient.DeleteRecordSet(nil, key, "abcd-efgh"+"."+default_zone, "TXT")
+		It("Should delete TXT record :", func() {
+			err := dnsClient.DeleteRecordSet(nil, key, "txt"+"."+"infobloxbtprpc", "TXT")
+			Expect(err).To(BeNil())
+		})
+		It("Should delete A record :", func() {
+			err := dnsClient.DeleteRecordSet(nil, key, "example"+"."+"infobloxbtprpc", "A")
+			Expect(err).To(BeNil())
+		})
+		It("Should delete CNAME record :", func() {
+			err := dnsClient.DeleteRecordSet(nil, key, "def_cname"+"."+"infobloxbtprpc", "CNAME")
 			Expect(err).To(BeNil())
 		})
 	})

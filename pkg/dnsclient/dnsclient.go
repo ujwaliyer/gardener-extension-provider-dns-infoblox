@@ -321,35 +321,47 @@ func (c *dnsClient) GetRecordSet(zone string, recordType string) (RecordSet, err
 		return nil, err
 	}
 
-	switch recordType {
-	case raw.Type_TXT:
-		rs := []raw.RecordTXT{}
-		err = json.Unmarshal(resp, &rs)
-		if err != nil {
-			return nil, err
-		}
-		rs2 := RecordSet{}
-		for _, r := range rs {
-			rs2 = append(rs2, r.Copy())
-		}
-
-		return rs2, nil
-
-	case raw.Type_A:
-		rs := []raw.RecordA{}
-		err = json.Unmarshal(resp, &rs)
-		if err != nil {
-			return nil, err
-		}
-
-		rs2 := RecordSet{}
-		for _, r := range rs {
-			rs2 = append(rs2, r.Copy())
-		}
-
-		return rs2, nil
+	rs := []raw.RecordTXT{}
+	err = json.Unmarshal(resp, &rs)
+	if err != nil {
+		return nil, err
+	}
+	rs2 := RecordSet{}
+	for _, r := range rs {
+		rs2 = append(rs2, r.Copy())
 	}
 
-	return nil, nil
+	return rs2, nil
+
+	// switch recordType {
+	// case raw.Type_TXT:
+	// 	rs := []raw.RecordTXT{}
+	// 	err = json.Unmarshal(resp, &rs)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	rs2 := RecordSet{}
+	// 	for _, r := range rs {
+	// 		rs2 = append(rs2, r.Copy())
+	// 	}
+
+	// 	return rs2, nil
+
+	// case raw.Type_A:
+	// 	rs := []raw.RecordA{}
+	// 	err = json.Unmarshal(resp, &rs)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+
+	// 	rs2 := RecordSet{}
+	// 	for _, r := range rs {
+	// 		rs2 = append(rs2, r.Copy())
+	// 	}
+
+	// 	return rs2, nil
+	// }
+
+	// return nil, nil
 
 }

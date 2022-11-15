@@ -278,9 +278,9 @@ func (c *dnsClient) GetRecordSet(zone string, recordType string) (RecordSet, err
 
 	results := c.client.(*ibclient.Connector)
 
-	// if record_type != raw.Type_TXT && record_type != raw.Type_A {
-	// 	return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
-	// }
+	if recordType != raw.Type_TXT && recordType != raw.Type_A {
+		return nil, fmt.Errorf("record type %s not supported for GetRecord", recordType)
+	}
 
 	execRequest := func(forceProxy bool, zone string, recordType string) ([]byte, error) {
 

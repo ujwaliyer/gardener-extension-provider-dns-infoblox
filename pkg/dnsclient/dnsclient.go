@@ -9,10 +9,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
-	ibclient1 "github.com/infobloxopen/infoblox-go-client"
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -22,7 +20,7 @@ import (
 
 type DNSClient interface {
 	GetManagedZones(ctx context.Context) (map[string]string, error)
-	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error
+	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, values []string, ttl int64) error
 	DeleteRecordSet(ctx context.Context, zone, name, recordType string) error
 }
 
@@ -45,38 +43,31 @@ type InfobloxConfig struct {
 	ProxyURL        *string `json:"proxyUrl,omitempty"`
 }
 
-func (ib *InfobloxConfig) fillDefaultDetails() error {
-	if ib.RequestTimeout == nil {
-		*ib.RequestTimeout = 60
-	} else {
-		return fmt.Errorf("no valid value for RequestTimeout")
-	}
+func assignDefaultValues() (InfobloxConfig, error) {
 
-	if ib.Version == nil {
-		*ib.Version = "2.10"
-	} else {
-		return fmt.Errorf("no valid value for API version")
-	}
+	port := 443
+	view := "default"
+	poolConnections := 10
+	requestTimeout := 60
+	version := "2.10"
 
-	if ib.View == nil {
-		*ib.View = "default"
-	} else {
-		return fmt.Errorf("no valid value for view")
-	}
+	return InfobloxConfig{
+		Port:            &port,
+		View:            &view,
+		PoolConnections: &poolConnections,
+		RequestTimeout:  &requestTimeout,
+		Version:         &version,
+	}, nil
 
-	if ib.PoolConnections == nil {
-		*ib.PoolConnections = 60
-	} else {
-		return fmt.Errorf("no valid value for no. of pool connections")
-	}
-
-	return nil
 }
 
 // NewDNSClient creates a new dns client based on the Infoblox config provided
 func NewDNSClient(ctx context.Context, username string, password string, host string) (DNSClient, error) {
 
-	infobloxConfig := &InfobloxConfig{}
+	infobloxConfig, err := assignDefaultValues()
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	// define hostConfig
 	hostConfig := ibclient.HostConfig{
@@ -88,12 +79,8 @@ func NewDNSClient(ctx context.Context, username string, password string, host st
 		Password: password,
 	}
 
-	err := infobloxConfig.fillDefaultDetails()
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	verify := "true"
+	// verify := "true"
+	verify := "false"
 	if infobloxConfig.SSLVerify != nil {
 		verify = strconv.FormatBool(*infobloxConfig.SSLVerify)
 	}
@@ -163,66 +150,61 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 // their user assigned resource names.
 func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, error) {
 
-	// dummy code for testing; might remove later
-	infobloxConfig := &InfobloxConfig{}
+	conn := c.client.(*ibclient.Connector)
 
-	// define hostConfig
-	hostConfig := ibclient1.HostConfig{
-		Host:    *infobloxConfig.Host,
-		Port:    strconv.Itoa(*infobloxConfig.Port),
-		Version: *infobloxConfig.Version,
-	}
-	verify := "false"
+	rt := ibclient.NewZoneAuth(ibclient.ZoneAuth{})
+	urlStr := conn.RequestBuilder.BuildUrl(ibclient.GET, rt.ObjectType(), "", rt.ReturnFields(), &ibclient.QueryParams{})
 
-	// define transportConfig
-	transportConfig := ibclient1.NewTransportConfig(verify, *infobloxConfig.RequestTimeout, *infobloxConfig.PoolConnections)
-
-	var requestBuilder ibclient1.HttpRequestBuilder = &ibclient1.WapiRequestBuilder{}
-
-	dns_client1, err := ibclient1.NewConnector(hostConfig, transportConfig, requestBuilder, &ibclient1.WapiHttpRequestor{})
+	req, err := http.NewRequest("GET", urlStr, new(bytes.Buffer))
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	// get all zones; need separate connector for using this function
-	objMgr := ibclient1.NewObjectManager(dns_client1, "VMWare", "")
+	req.Header.Set("Content-Type", "application/json")
+	req.SetBasicAuth(conn.HostConfig.Username, conn.HostConfig.Password)
 
-	// todo: getzoneauth only supported in v1; record creation needs v2; what to do?
-	all_zones, err := objMgr.GetZoneAuth()
+	resp, err := conn.Requestor.SendRequest(req)
 	if err != nil {
-		// fmt.Println(err)
-		return nil, err
+		fmt.Println(err)
 	}
 
-	// var zone_list []string
-	zone_list := make(map[string]string)
+	rs := []ibclient.ZoneAuth{}
+	err = json.Unmarshal(resp, &rs)
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	for _, zone := range all_zones {
+	ZoneList := make(map[string]string)
+
+	for _, zone := range rs {
 		// zone_list = append(zone_list, zone.Fqdn)
-		zone_list[zone.Ref] = zone.Fqdn
+		ZoneList[zone.Ref] = zone.Fqdn
 	}
 
-	return zone_list, nil
+	return ZoneList, nil
 }
 
 // CreateOrUpdateRecordSet creates or updates the resource recordset with the given name, record type, rrdatas, and ttl
 // in the managed zone with the given name or ID.
-func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, ip_addrs []string, ttl int64) error {
-	records, err := c.GetRecordSet(name, record_type, zone)
+func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, values []string, ttl int64) error {
+	records, err := c.GetRecordSet(zone)
 	if err != nil {
 		return err
 	}
 
-	err_del := c.DeleteRecordSet(ctx, zone, name, record_type)
-	if err_del != nil {
-		fmt.Println(err_del)
+	for _, r := range records {
+		if r.GetDNSName() == name {
+			err_del := c.DeleteRecord(r.(raw.Record), zone)
+			if err_del != nil {
+				return err_del
+			}
+		}
 	}
 
-	for _, r := range records {
-		r0 := c.NewRecord(r.GetDNSName(), view, zone, r.GetValue(), int64(r.GetTTL()), r.GetType())
-		err := c.CreateRecord(r0, zone)
+	for _, value := range values {
+		_, err := c.createRecord(name, view, value, ttl, record_type)
 		if err != nil {
-			fmt.Println(err)
+			return err
 		}
 	}
 
@@ -232,7 +214,7 @@ func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, view, zone, nam
 // DeleteRecordSet deletes the resource recordset with the given name and record type
 // in the managed zone with the given name or ID.
 func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, record_type string) error {
-	records, err := c.GetRecordSet(name, record_type, zone)
+	records, err := c.GetRecordSet(zone)
 	if err != nil {
 		return err
 	}
@@ -249,55 +231,41 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, record_type
 }
 
 // create DNS record for the Infoblox DDI setup
-func (c *dnsClient) NewRecord(name string, view string, zone string, value string, ttl int64, record_type string) (record raw.Record) {
+func (c *dnsClient) createRecord(name string, view string, value string, ttl int64, record_type string) (string, error) {
+
+	var record string
+	var err error
+	var rec ibclient.IBObject
 
 	switch record_type {
 	case raw.Type_A:
-		r := ibclient.NewEmptyRecordA()
-		r.View = view
-		r.Name = name
-		r.Ipv4Addr = value
-		r.Ttl = uint32(ttl)
-		record = (*raw.RecordA)(r)
+		rec = ibclient.NewRecordA(view, "", name, value, uint32(ttl), false, "", nil, "")
+
 	case raw.Type_AAAA:
-		r := ibclient.NewEmptyRecordAAAA()
-		r.View = view
-		r.Name = name
-		r.Ipv6Addr = value
-		r.Ttl = uint32(ttl)
-		record = (*raw.RecordAAAA)(r)
+		rec = ibclient.NewRecordAAAA(view, name, value, false, uint32(ttl), "", nil, "")
+
 	case raw.Type_CNAME:
-		r := ibclient.NewEmptyRecordCNAME()
-		r.View = view
-		r.Name = name
-		r.Canonical = value
-		r.Ttl = uint32(ttl)
-		record = (*raw.RecordCNAME)(r)
+		rec = ibclient.NewRecordCNAME(view, value, name, true, uint32(ttl), "", nil, "")
+
 	case raw.Type_TXT:
-		if n, err := strconv.Unquote(value); err == nil && !strings.Contains(value, " ") {
-			value = n
-		}
-		record = (*raw.RecordTXT)(ibclient.NewRecordTXT(ibclient.RecordTXT{
+		rec = ibclient.NewRecordTXT(ibclient.RecordTXT{
 			Name: name,
-			Text: value,
 			View: view,
-		}))
+			Text: value,
+		})
 	}
 
-	return
-}
+	record, err = c.client.CreateObject(rec)
+	if err != nil {
+		return "", err
+	}
 
-func (c *dnsClient) CreateRecord(r raw.Record, zone string) error {
-
-	_, err := c.client.CreateObject(r.(ibclient.IBObject))
-	return err
-
+	return record, nil
 }
 
 func (c *dnsClient) DeleteRecord(record raw.Record, zone string) error {
 
 	_, err := c.client.DeleteObject(record.GetId())
-
 	if err != nil {
 		return err
 	}
@@ -306,18 +274,22 @@ func (c *dnsClient) DeleteRecord(record raw.Record, zone string) error {
 
 }
 
-func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordSet, error) {
+func (c *dnsClient) GetRecordSet(zone string) (RecordSet, error) {
 
 	results := c.client.(*ibclient.Connector)
 
-	if record_type != raw.Type_TXT {
-		return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
-	}
+	// if record_type != raw.Type_TXT && record_type != raw.Type_A {
+	// 	return nil, fmt.Errorf("record type %s not supported for GetRecord", record_type)
+	// }
 
-	execRequest := func(forceProxy bool) ([]byte, error) {
-		rt := ibclient.NewRecordTXT(ibclient.RecordTXT{})
-		urlStr := results.RequestBuilder.BuildUrl(ibclient.GET, rt.ObjectType(), "", rt.ReturnFields(), &ibclient.QueryParams{})
-		urlStr += "&name=" + name
+	execRequest := func(forceProxy bool, zone string) ([]byte, error) {
+
+		record_map := make(map[string]string)
+		record_map["zone"] = zone
+		query_params := ibclient.NewQueryParams(false, record_map)
+
+		urlStr := results.RequestBuilder.BuildUrl(ibclient.GET, "allrecords", "", nil, query_params)
+		// urlStr += "&name=" + name
 		if forceProxy {
 			urlStr += "&_proxy_search=GM"
 		}
@@ -331,10 +303,10 @@ func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordS
 		return results.Requestor.SendRequest(req)
 	}
 
-	resp, err := execRequest(false)
+	resp, err := execRequest(false, zone)
 	if err != nil {
 		// Forcing the request to redirect to Grid Master by making forcedProxy=true
-		resp, err = execRequest(true)
+		resp, err = execRequest(true, zone)
 		// fmt.Println(err)
 	}
 	if err != nil {
@@ -352,4 +324,5 @@ func (c *dnsClient) GetRecordSet(name, record_type string, zone string) (RecordS
 		rs2 = append(rs2, r.Copy())
 	}
 	return rs2, nil
+
 }

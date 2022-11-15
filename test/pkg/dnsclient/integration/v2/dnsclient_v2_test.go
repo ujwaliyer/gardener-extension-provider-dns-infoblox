@@ -1,18 +1,18 @@
 package integration
 
 import (
-	// "fmt"
-	ibclient "github.com/infobloxopen/infoblox-go-client"
+	"fmt"
+	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	testInfoBlox "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient/test"
+	testInfoBloxV2 "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient/test/v2"
 	// "testing"
 	// . "testInfoblox"
 )
 
 var _ = Describe("Dnsclient", func() {
 
-	var objMgr *ibclient.ObjectManager
+	var objMgr ibclient.IBObjectManager
 	const hostAdd string = "example.com"
 	var refString string
 	var refCNAMEString string
@@ -21,11 +21,11 @@ var _ = Describe("Dnsclient", func() {
 	var refAString string
 
 	BeforeEach(func() {
-		conn := testInfoBlox.GetInfoBloxInstance()
+		conn := testInfoBloxV2.GetInfoBloxInstanceV2()
 		objMgr = ibclient.NewObjectManager(conn, "VMWare", "")
-		objMgr.OmitCloudAttrs = true
 	})
 	Context("with connect api ", func() {
+
 		It("should create Zone Auth", func() {
 			ea := make(ibclient.EA)
 			newZone, znErr := objMgr.CreateZoneAuth(hostAdd, ea)
@@ -34,18 +34,18 @@ var _ = Describe("Dnsclient", func() {
 			Expect(znErr).To(BeNil())
 			Expect(zoneAuth).NotTo(BeNil())
 			Expect(err).To(BeNil())
-
 		})
 
 		It("should create CNAME record Object", func() {
 			canonical := "test-canonical.example.com"
 			recordName := "test.example.com"
-			// useTtl := false
-			// ttl := uint32(0)
-			// comment := "test CNAME record creation"
+			useTtl := false
+			ttl := uint32(0)
+			comment := "test CNAME record creation"
 			ea := make(ibclient.EA)
-			aCNAMERecord, err := objMgr.CreateCNAMERecord(canonical, recordName, dnsView, ea)
+			aCNAMERecord, err := objMgr.CreateCNAMERecord(dnsView, canonical, recordName, useTtl, ttl, comment, ea)
 			refCNAMEString = aCNAMERecord.Ref
+			fmt.Println(refCNAMEString)
 			Expect(aCNAMERecord).NotTo(BeNil())
 			Expect(err).To(BeNil())
 		})
@@ -61,11 +61,11 @@ var _ = Describe("Dnsclient", func() {
 		It("should create A record Object", func() {
 			recordName := "example.com"
 			netView := ""
-			// useTtl := false
-			// ttl := uint32(0)
-			// comment := "test CNAME record creation"
+			useTtl := false
+			ttl := uint32(0)
+			comment := "test A record creation"
 			ea := make(ibclient.EA)
-			aRecord, err := objMgr.CreateARecord(netView, dnsView, recordName, "10.16.0.0/8", "10.16.1.2", ea)
+			aRecord, err := objMgr.CreateARecord(netView, dnsView, recordName, "10.16.0.0/8", "10.16.1.2", ttl, useTtl, comment, ea)
 			refAString = aRecord.Ref
 			Expect(aRecord).NotTo(BeNil())
 			Expect(err).To(BeNil())

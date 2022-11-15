@@ -1,39 +1,62 @@
 package integration
 
 import (
+	// "fmt"
+	// ibclient "github.com/infobloxopen/infoblox-go-client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	// dnsInfoBlox "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient"
+	dnsInfoBlox "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient"
 )
 
 var _ = Describe("NewDnsclient", func() {
+	var dnsClient dnsInfoBlox.DNSClient
+	var zone map[string]string
+	var default_zone = "sujindar.com"
+	var user = "admin"
+	var password = "btprpc_infoblox"
+	var key string
+	var id_addr = []string{"10.16.2.13"}
+	BeforeEach(func() {
+		Host := "10.16.198.17"
+		dnsC, err := dnsInfoBlox.NewDNSClient(nil, user, password, Host)
+		dnsClient = dnsC
+		Expect(dnsC).NotTo(BeNil())
+		Expect(err).To(BeNil())
+	})
+	Context("DNSClient go testing", func() {
+		It("GetManaged zone :", func() {
+			zones, err := dnsClient.GetManagedZones(nil)
+			Ω(zones).Should(ContainElement(ContainSubstring(default_zone), &zone))
+			for k := range zone {
+				key = k
+			}
+			Expect(err).To(BeNil())
+		})
+		It("Should not create A record :", func() {
+			err := dnsClient.CreateOrUpdateRecordSet(nil, "default", key, "example.com", "A", id_addr, 30)
+			Expect(err).NotTo(BeNil())
+		})
+		It("Should create TXT record :", func() {
+			err := dnsClient.CreateOrUpdateRecordSet(nil, "default", key, "abcd-efgh"+"."+default_zone, "TXT", id_addr, 30)
+			Expect(err).To(BeNil())
+		})
 
-	// Before(func() {
-	// c := &InfobloxConfig{
-	// 	Host:            "10.16.198.191",
-	// 	Port:            "443",
-	// 	SSLVerify:       false,
-	// 	Version:         2.10,
-	// 	View:            "",
-	// 	PoolConnections: 10,
-	// 	RequestTimeout:  20,
-	// 	CaCert:          nil,
-	// 	MaxResults:      100,
-	// 	ProxyURL:        nil,
-	// }
-	// dnsC := dnsInfoBlox.NewDNSClient(nil, "admin", "infoblox")
-	// Accessing struct fields using the dot operator
-	// fmt.Println("Car Name: ", c.Host)
-	// fmt.Println("Car Color: ", c.Port)
+		It("Should create CNAME record :", func() {
+			err := dnsClient.CreateOrUpdateRecordSet(nil, "default", key, "txt.example.com", "CNAME", id_addr, 30)
+			Expect(err).NotTo(BeNil())
+		})
 
-	// conn := dnsInfoBlox.GetInfoBloxInstance()
-	// objMgr := ibclient.NewObjectManager(connec, "VMWare", "")
-	// })
-	Context("with connect api ", func() {
-		It("should get the Zone Auth", func() {
-			// zoneAuth := objMgr.GetZoneAuth()
-			// fmt.Println(conn)
-			Expect("abc").To(Equal("abc"))
+		It("Should delete TXT record :", func() {
+			err := dnsClient.DeleteRecordSet(nil, key, "txt"+"."+"infobloxbtprpc", "TXT")
+			Expect(err).To(BeNil())
+		})
+		It("Should delete A record :", func() {
+			err := dnsClient.DeleteRecordSet(nil, key, "example"+"."+"infobloxbtprpc", "A")
+			Expect(err).To(BeNil())
+		})
+		It("Should delete CNAME record :", func() {
+			err := dnsClient.DeleteRecordSet(nil, key, "def_cname"+"."+"infobloxbtprpc", "CNAME")
+			Expect(err).To(BeNil())
 		})
 	})
 })

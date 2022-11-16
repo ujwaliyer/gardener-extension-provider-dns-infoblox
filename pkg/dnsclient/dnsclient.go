@@ -300,18 +300,7 @@ func (c *dnsClient) GetRecordSet(zone string, recordType string) (RecordSet, err
 			rec = "allrecords"
 		}
 
-		// var rt ibclient.IBObject
-		// switch recordType {
-		// case "record:txt":
-		// 	rt = ibclient.NewRecordTXT(ibclient.RecordTXT{})
-		// case "record:a":
-		// 	rt = ibclient.NewEmptyRecordA()
-		// }
-
 		urlStr := results.RequestBuilder.BuildUrl(ibclient.GET, rec, "", nil, query_params)
-		// urlStr := results.RequestBuilder.BuildUrl(ibclient.GET, rt.ObjectType(), "", rt.ReturnFields(), &ibclient.QueryParams{})
-
-		// urlStr += "&name=" + name
 		if forceProxy {
 			urlStr += "&_proxy_search=GM"
 		}

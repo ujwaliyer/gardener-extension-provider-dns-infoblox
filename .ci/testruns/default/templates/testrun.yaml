@@ -1,61 +1,42 @@
 apiVersion: testmachinery.sapcloud.io/v1beta1
 kind: Testrun
 metadata:
-  generateName: tm-extension-aws-
+  generateName: tm-extension-provider-infoblox-
   namespace: default
 spec:
   ttlSecondsAfterFinished: 172800 # 2 days
   {{- if .Values.revision }}
   locationSets:
   - default: true
-    name: provider-aws
+    name: provider-dns-infoblox
     locations:
     - type: git
-      repo: https://github.com/gardener/gardener-extension-provider-aws.git
+      repo: https://github.com/ujwaliyer/gardener-extension-provider-dns-infoblox.git
       revision: {{ .Values.revision }}
   {{- end }}
 
   config:
-  - name: ACCESS_KEY_ID
+  - name: USERNAME
     type: env
     valueFrom:
       secretKeyRef:
-        name: shoot-operator-aws
-        key: accessKeyID
-  - name: SECRET_ACCESS_KEY
+        name: dnsrecord-external
+        key: username
+  - name: PASSWORD  
     type: env
     valueFrom:
       secretKeyRef:
-        name: shoot-operator-aws
-        key: secretAccessKey
-  - name: DNS_ACCESS_KEY_ID
+        name: dnsrecord-external
+        key: password
+  - name: HOST  
     type: env
     valueFrom:
       secretKeyRef:
-        name: route53-operator-aws
-        key: accessKeyID
-  - name: DNS_SECRET_ACCESS_KEY
-    type: env
-    valueFrom:
-      secretKeyRef:
-        name: route53-operator-aws
-        key: secretAccessKey
+        name: dnsrecord-external
+        key: host
+  
 
   testflow:
-  - name: infrastructure-test
-    definition:
-      name: infrastructure-test
-      config:
-      - name: REGION
-        type: env
-        value: eu-west-1
-  - name: bastion-test
-    definition:
-      name: bastion-test
-      config:
-      - name: REGION
-        type: env
-        value: eu-west-1
   - name: dnsrecord-test
     definition:
       name: dnsrecord-test

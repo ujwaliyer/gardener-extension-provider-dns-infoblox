@@ -22,6 +22,7 @@ require (
 	k8s.io/component-base v0.23.3
 	sigs.k8s.io/controller-runtime v0.11.0
 	sigs.k8s.io/controller-tools v0.8.0
+	github.com/spf13/viper v1.13.0
 )
 
 require (

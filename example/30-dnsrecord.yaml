@@ -9,6 +9,7 @@ data:
   view: default
 # username: base64(username)
 # password: base64(password) 
+# host: base64(host) 
 ---
 apiVersion: extensions.gardener.cloud/v1alpha1
 kind: Cluster

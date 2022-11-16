@@ -224,7 +224,7 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, record_type
 	}
 
 	for _, rec := range records {
-		if rec.GetId() != "" {
+		if rec.GetId() != "" && rec.GetDNSName() == name {
 			err := c.DeleteRecord(rec.(raw.Record), zone)
 			if err != nil {
 				return err
@@ -278,7 +278,6 @@ func (c *dnsClient) DeleteRecord(record raw.Record, zone string) error {
 
 }
 
-
 func (c *dnsClient) GetRecordSet(zone string, recordType string) (RecordSet, error) {
 
 	results := c.client.(*ibclient.Connector)
@@ -288,7 +287,7 @@ func (c *dnsClient) GetRecordSet(zone string, recordType string) (RecordSet, err
 	}
 
 	execRequest := func(forceProxy bool, zone string, recordType string) ([]byte, error) {
-  
+
 		record_map := make(map[string]string)
 		record_map["zone"] = zone
 		query_params := ibclient.NewQueryParams(false, record_map)
@@ -302,8 +301,6 @@ func (c *dnsClient) GetRecordSet(zone string, recordType string) (RecordSet, err
 		}
 
 		urlStr := results.RequestBuilder.BuildUrl(ibclient.GET, rec, "", nil, query_params)
-
-		// urlStr += "&name=" + name
 		if forceProxy {
 			urlStr += "&_proxy_search=GM"
 		}
@@ -316,7 +313,6 @@ func (c *dnsClient) GetRecordSet(zone string, recordType string) (RecordSet, err
 
 		return results.Requestor.SendRequest(req)
 	}
-
 
 	resp, err := execRequest(false, zone, recordType)
 	if err != nil {

@@ -16,19 +16,19 @@ spec:
   {{- end }}
 
   config:
-  - name: USERNAME
+  - name: INFOBLOX_USERNAME
     type: env
     valueFrom:
       secretKeyRef:
         name: dnsrecord-external
         key: username
-  - name: PASSWORD  
+  - name: INFOBLOX_PASSWORD  
     type: env
     valueFrom:
       secretKeyRef:
         name: dnsrecord-external
         key: password
-  - name: HOST  
+  - name: INFOBLOX_HOST  
     type: env
     valueFrom:
       secretKeyRef:

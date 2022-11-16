@@ -224,7 +224,7 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zone, name, record_type
 	}
 
 	for _, rec := range records {
-		if rec.GetId() != "" {
+		if rec.GetId() != "" && rec.GetDNSName() == name {
 			err := c.DeleteRecord(rec.(raw.Record), zone)
 			if err != nil {
 				return err

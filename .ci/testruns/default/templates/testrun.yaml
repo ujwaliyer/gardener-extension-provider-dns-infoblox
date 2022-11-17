@@ -1,0 +1,46 @@
+apiVersion: testmachinery.sapcloud.io/v1beta1
+kind: Testrun
+metadata:
+  generateName: tm-extension-provider-infoblox-
+  namespace: default
+spec:
+  ttlSecondsAfterFinished: 172800 # 2 days
+  {{- if .Values.revision }}
+  locationSets:
+  - default: true
+    name: provider-dns-infoblox
+    locations:
+    - type: git
+      repo: https://github.com/ujwaliyer/gardener-extension-provider-dns-infoblox.git
+      revision: {{ .Values.revision }}
+  {{- end }}
+
+  config:
+  - name: INFOBLOX_USERNAME
+    type: env
+    valueFrom:
+      secretKeyRef:
+        name: dnsrecord-external
+        key: username
+  - name: INFOBLOX_PASSWORD  
+    type: env
+    valueFrom:
+      secretKeyRef:
+        name: dnsrecord-external
+        key: password
+  - name: INFOBLOX_HOST  
+    type: env
+    valueFrom:
+      secretKeyRef:
+        name: dnsrecord-external
+        key: host
+  
+
+  testflow:
+  - name: dnsrecord-test
+    definition:
+      name: dnsrecord-test
+      config:
+      - name: USE_EXISTING_CLUSTER
+        type: env
+        value: "true"

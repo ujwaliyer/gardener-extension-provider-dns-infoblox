@@ -302,6 +302,7 @@ func (c *dnsClient) GetRecordSet(zone string, recordType string) (RecordSet, err
 		}
 
 		urlStr := results.RequestBuilder.BuildUrl(ibclient.GET, rec.ObjectType(), "", nil, query_params)
+
 		if forceProxy {
 			urlStr += "&_proxy_search=GM"
 		}

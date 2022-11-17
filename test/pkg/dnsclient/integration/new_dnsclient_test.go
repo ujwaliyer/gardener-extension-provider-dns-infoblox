@@ -6,14 +6,16 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	dnsInfoBlox "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient"
+	cfg "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient/test/config"
 )
 
 var _ = Describe("NewDnsclient", func() {
 	var dnsClient dnsInfoBlox.DNSClient
+	// var cnfg cfg.Config
 	var zone map[string]string
-	const default_zone = "sujindar.com"
-	const user = "admin"
-	const password = "btprpc_infoblox"
+	var default_zone string
+	var user string
+	var password string
 	var value string
 	const a_record_name = "example.com"
 	const txt_record_name = "abcd-efgh"
@@ -21,7 +23,28 @@ var _ = Describe("NewDnsclient", func() {
 	var id_addr = []string{"10.16.2.13"}
 	const dns_view = "default"
 	BeforeEach(func() {
-		Host := "10.16.198.17"
+		config := cfg.GetConfig()
+		Host := config.Host
+		user = config.Username
+		password = config.Password
+		default_zone = config.DefaultZone
+
+		Expect(user).NotTo(BeEmpty())
+		Expect(user).NotTo(BeNil())
+		Expect(user).NotTo(Equal(""))
+
+		Expect(password).NotTo(BeEmpty())
+		Expect(password).NotTo(BeNil())
+		Expect(password).NotTo(Equal(""))
+
+		Expect(default_zone).NotTo(BeEmpty())
+		Expect(default_zone).NotTo(BeNil())
+		Expect(default_zone).NotTo(Equal(""))
+
+		Expect(Host).NotTo(BeEmpty())
+		Expect(Host).NotTo(BeNil())
+		Expect(Host).NotTo(Equal(""))
+
 		dnsC, err := dnsInfoBlox.NewDNSClient(nil, user, password, Host)
 		dnsClient = dnsC
 		Expect(dnsC).NotTo(BeNil())

@@ -5,15 +5,17 @@ import (
 )
 
 type Config struct {
-	Username    string `mapstructure:"IB_TEST_USERNAME"`
-	Password    string `mapstructure:"IB_TEST_PASSWORD"`
-	Host        string `mapstructure:"IB_TEST_HOST"`
+	Username    string `mapstructure:"INFOBLOX_USERNAME"`
+	Password    string `mapstructure:"INFOBLOX_PASSWORD"`
+	Host        string `mapstructure:"INFOBLOX_HOST"`
 	DefaultZone string `mapstructure:"IB_TEST_DEFAULT_ZONE"`
 }
 
-func LoadConfig(path string) (config Config, err error) {
-	viper.AddConfigPath(path)
-	viper.SetConfigName("app")
+var cfg Config
+
+func LoadConfig() (config Config, err error) {
+	viper.AddConfigPath("../../../../config")
+	viper.SetConfigName("infoblox")
 	viper.SetConfigType("env")
 
 	viper.AutomaticEnv()
@@ -24,5 +26,10 @@ func LoadConfig(path string) (config Config, err error) {
 	}
 
 	err = viper.Unmarshal(&config)
+	cfg = config
 	return
+}
+
+func GetConfig() (config Config) {
+	return cfg
 }

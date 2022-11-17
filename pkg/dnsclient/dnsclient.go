@@ -292,15 +292,16 @@ func (c *dnsClient) GetRecordSet(zone string, recordType string) (RecordSet, err
 		record_map["zone"] = zone
 		query_params := ibclient.NewQueryParams(false, record_map)
 
-		var rec string
+		var rec ibclient.IBObject
 
-		if recordType != "" {
-			rec = recordType
-		} else {
-			rec = "allrecords"
+		switch recordType {
+		case "A":
+			rec = ibclient.NewEmptyRecordA()
+		case "TXT":
+			rec = ibclient.NewRecordTXT(ibclient.RecordTXT{})
 		}
 
-		urlStr := results.RequestBuilder.BuildUrl(ibclient.GET, rec, "", nil, query_params)
+		urlStr := results.RequestBuilder.BuildUrl(ibclient.GET, rec.ObjectType(), "", nil, query_params)
 		if forceProxy {
 			urlStr += "&_proxy_search=GM"
 		}

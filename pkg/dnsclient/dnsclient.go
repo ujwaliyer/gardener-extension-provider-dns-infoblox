@@ -72,9 +72,12 @@ func NewDNSClient(ctx context.Context, username string, password string, host st
 	// define hostConfig
 	hostConfig := ibclient.HostConfig{
 		// Host:     *infobloxConfig.Host,
-		Host:     host,
-		Port:     strconv.Itoa(*infobloxConfig.Port),
-		Version:  *infobloxConfig.Version,
+		Host:    host,
+		Port:    strconv.Itoa(*infobloxConfig.Port),
+		Version: *infobloxConfig.Version,
+	}
+
+	authCfg := ibclient.AuthConfig{
 		Username: username,
 		Password: password,
 	}

@@ -14,4 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-./vendor/github.com/gardener/gardener/hack/hook-me.sh cloudflare-dns $@
+./vendor/github.com/gardener/gardener/hack/hook-me.sh infoblox-dns $@

@@ -24,7 +24,8 @@ package v1alpha1
 import (
 	unsafe "unsafe"
 
-	config "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config"
+	
+	config "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/apis/config"
 	conversion "k8s.io/apimachinery/pkg/conversion"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	componentbaseconfig "k8s.io/component-base/config"

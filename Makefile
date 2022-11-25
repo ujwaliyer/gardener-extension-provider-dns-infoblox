@@ -107,7 +107,7 @@ check:
 
 .PHONY: check-docforge
 check-docforge: $(DOCFORGE)
-	@$(REPO_ROOT)/vendor/github.com/gardener/gardener/hack/check-docforge.sh $(REPO_ROOT) $(REPO_ROOT)/.docforge/manifest.yaml ".docforge/;docs/" "gardener-extension-provider-dns-cloudflare" false
+	@$(REPO_ROOT)/vendor/github.com/gardener/gardener/hack/check-docforge.sh $(REPO_ROOT) $(REPO_ROOT)/.docforge/manifest.yaml ".docforge/;docs/" "gardener-extension-provider-dns-infoblox" false
 
 .PHONY: generate
 generate:

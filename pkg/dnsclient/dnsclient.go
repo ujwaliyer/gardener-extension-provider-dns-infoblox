@@ -79,8 +79,8 @@ func NewDNSClient(ctx context.Context, username string, password string, host st
 		Password: password,
 	}
 
-	// verify := "true"
-	verify := "false"
+	verify := "true"
+	// verify := "false"
 	if infobloxConfig.SSLVerify != nil {
 		verify = strconv.FormatBool(*infobloxConfig.SSLVerify)
 	}

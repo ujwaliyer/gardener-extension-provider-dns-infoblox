@@ -14,7 +14,9 @@ import (
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	runtimelog "sigs.k8s.io/controller-runtime/pkg/log"
+	"github.com/gardener/gardener/pkg/logger"
 
 	raw "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/infoblox"
 )

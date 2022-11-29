@@ -161,7 +161,10 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, err
 	}
 
 	// print urlstring
-	fmt.Println(urlStr + "ident_test")
+	runtimelog.SetLogger(logger.ZapLogger(false))
+	var err error
+	runtimelog.log.Error(err, "ident_test")
+	
 
 	req.Header.Set("Content-Type", "application/json")
 	req.SetBasicAuth(conn.HostConfig.Username, conn.HostConfig.Password)

@@ -10,6 +10,7 @@ data:
   USERNAME: base64(USERNAME)
   PASSWORD: base64(PASSWORD) 
   HOST: base64(HOST) 
+
 ---
 apiVersion: extensions.gardener.cloud/v1alpha1
 kind: Cluster

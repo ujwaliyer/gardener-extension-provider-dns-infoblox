@@ -126,18 +126,18 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 		return nil, err
 	}
 
-	username, ok := secret.Data["username"]
+	username, ok := secret.Data["USERNAME"]
 	if !ok {
 		return nil, fmt.Errorf("no username found")
 	}
 
-	password, ok := secret.Data["password"]
+	password, ok := secret.Data["PASSWORD"]
 	if !ok {
 		return nil, fmt.Errorf("no password found")
 	}
 
 	// placeholder for host details using providerConfig
-	host, ok := secret.Data["host"]
+	host, ok := secret.Data["HOST"]
 	if !ok {
 		return nil, fmt.Errorf("no host details found")
 	}

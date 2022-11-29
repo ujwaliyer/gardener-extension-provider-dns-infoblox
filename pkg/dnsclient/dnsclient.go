@@ -14,6 +14,7 @@ import (
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	runtimelog "sigs.k8s.io/controller-runtime/pkg/log"
 
 	raw "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/infoblox"
 )
@@ -162,8 +163,8 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, err
 
 	// print urlstring
 	runtimelog.SetLogger(logger.ZapLogger(false))
-	var err error
-	runtimelog.log.Error(err, "ident_test")
+	var err_log error
+	runtimelog.log.Error(err_log, "ident_test")
 	
 
 	req.Header.Set("Content-Type", "application/json")

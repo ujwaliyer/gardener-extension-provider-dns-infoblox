@@ -115,7 +115,7 @@ func LogDetails(params ...string) {
 
 	if len(params) != 0 {
 		for _, param := range params {
-			runtimelog.Log.Error(errLog, param+"	indent_test		")
+			runtimelog.Log.Error(errLog, param)
 		}
 	}
 

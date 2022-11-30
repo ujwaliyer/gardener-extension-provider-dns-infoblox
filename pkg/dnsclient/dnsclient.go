@@ -50,7 +50,7 @@ type InfobloxConfig struct {
 	ProxyURL        *string `json:"proxyUrl,omitempty"`
 }
 
-func assignDefaultValues() (InfobloxConfig, error) {
+func assignDefaultValues(host string) (InfobloxConfig, error) {
 
 	port := 443
 	view := "default"
@@ -59,6 +59,7 @@ func assignDefaultValues() (InfobloxConfig, error) {
 	version := "2.10"
 
 	return InfobloxConfig{
+		Host:            &host,
 		Port:            &port,
 		View:            &view,
 		PoolConnections: &poolConnections,
@@ -71,15 +72,14 @@ func assignDefaultValues() (InfobloxConfig, error) {
 // NewDNSClient creates a new dns client based on the Infoblox config provided
 func NewDNSClient(ctx context.Context, username string, password string, host string) (DNSClient, error) {
 
-	infobloxConfig, err := assignDefaultValues()
+	infobloxConfig, err := assignDefaultValues(host)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	// define hostConfig
 	hostConfig := ibclient.HostConfig{
-		// Host:     *infobloxConfig.Host,
-		Host:     host,
+		Host:     *infobloxConfig.Host,
 		Port:     strconv.Itoa(*infobloxConfig.Port),
 		Version:  *infobloxConfig.Version,
 		Username: username,

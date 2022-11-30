@@ -19,7 +19,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient"
+	dnsclient "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient"
+	raw "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/infoblox"
 
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	"github.com/gardener/gardener/extensions/pkg/controller/common"
@@ -63,7 +64,7 @@ func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRec
 	}
 
 	// logger
-	dnsClient.LogDetails("Printing secret ref: " + fmt.Sprintf("%+v", dns.Spec.SecretRef.Data["USERNAME"]))
+	raw.LogDetails("reconcile secret ref: " + fmt.Sprintf("%+v", dns.Spec.SecretRef))
 
 	// Determine DNS managed zone
 	managedZone, err := a.getManagedZone(ctx, dns, dnsClient)

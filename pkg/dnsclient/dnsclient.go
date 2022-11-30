@@ -38,7 +38,7 @@ type dnsClient struct {
 type RecordSet []raw.Base_Record
 
 type InfobloxConfig struct {
-	Host            *string `json:"host,omitempty"`
+	Host            *string `json:"HOST,omitempty"`
 	Port            *int    `json:"port,omitempty"`
 	SSLVerify       *bool   `json:"sslVerify,omitempty"`
 	Version         *string `json:"version,omitempty"`

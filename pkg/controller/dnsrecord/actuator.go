@@ -63,7 +63,7 @@ func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRec
 	}
 
 	// logger
-	dnsClient.LogDetails("Printing secret ref: " + fmt.Sprintf("%+v", dns.Spec.SecretRef))
+	dnsClient.LogDetails("Printing secret ref: " + fmt.Sprintf("%+v", dns.Spec.SecretRef.Data["USERNAME"]))
 
 	// Determine DNS managed zone
 	managedZone, err := a.getManagedZone(ctx, dns, dnsClient)

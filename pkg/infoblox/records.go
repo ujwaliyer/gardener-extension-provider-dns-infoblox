@@ -3,7 +3,13 @@ package infoblox
 import (
 	"strconv"
 
+	"github.com/gardener/gardener/pkg/logger"
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
+	runtimelog "sigs.k8s.io/controller-runtime/pkg/log"
+)
+
+var (
+	errLog error
 )
 
 const (
@@ -101,4 +107,16 @@ func EnsureQuotedText(v string) string {
 		v = strconv.Quote(v)
 	}
 	return v
+}
+
+func LogDetails(params ...string) {
+
+	runtimelog.SetLogger(logger.ZapLogger(false))
+
+	if len(params) != 0 {
+		for _, param := range params {
+			runtimelog.Log.Error(errLog, param+"	indent_test		")
+		}
+	}
+
 }

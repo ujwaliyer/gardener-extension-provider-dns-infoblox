@@ -29,7 +29,6 @@ type DNSClient interface {
 	GetManagedZones(ctx context.Context) (map[string]string, error)
 	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, values []string, ttl int64) error
 	DeleteRecordSet(ctx context.Context, zone, name, recordType string) error
-	LogDetails(params ...string)
 }
 
 type dnsClient struct {
@@ -86,6 +85,9 @@ func NewDNSClient(ctx context.Context, username string, password string, host st
 		Username: username,
 		Password: password,
 	}
+
+	// logger
+	raw.LogDetails(fmt.Sprintf("%+v", hostConfig))
 
 	verify := "true"
 	// verify := "false"
@@ -355,17 +357,5 @@ func (c *dnsClient) GetRecordSet(zone string, recordType string) (RecordSet, err
 	}
 
 	return rs2, nil
-
-}
-
-func (c *dnsClient) LogDetails(params ...string) {
-
-	runtimelog.SetLogger(logger.ZapLogger(false))
-
-	if len(params) != 0 {
-		for _, param := range params {
-			runtimelog.Log.Error(errLog, param+"	indent_test		")
-		}
-	}
 
 }

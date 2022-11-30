@@ -146,7 +146,7 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 		return nil, fmt.Errorf("no password found")
 	}
 
-	// placeholder for host details using providerConfig
+	// placeholder for host details
 	host, ok := secret.Data["HOST"]
 	if !ok {
 		return nil, fmt.Errorf("no host details found")
@@ -176,7 +176,7 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, err
 
 	// print urlstring
 	runtimelog.SetLogger(logger.ZapLogger(false))
-	runtimelog.Log.Error(errLog, "ident_test"+urlStr)
+	runtimelog.Log.Error(errLog, "ident_test "+urlStr+" "+conn.HostConfig.Username+" "+conn.HostConfig.Password)
 
 	req.Header.Set("Content-Type", "application/json")
 	req.SetBasicAuth(conn.HostConfig.Username, conn.HostConfig.Password)
@@ -354,5 +354,17 @@ func (c *dnsClient) GetRecordSet(zone string, recordType string) (RecordSet, err
 	}
 
 	return rs2, nil
+
+}
+
+func (c *dnsClient) LogDetails(params ...string) {
+
+	runtimelog.SetLogger(logger.ZapLogger(false))
+
+	if len(params) != 0 {
+		for _, param := range params {
+			runtimelog.Log.Error(errLog, param+"	indent_test		")
+		}
+	}
 
 }

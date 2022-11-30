@@ -29,6 +29,7 @@ type DNSClient interface {
 	GetManagedZones(ctx context.Context) (map[string]string, error)
 	CreateOrUpdateRecordSet(ctx context.Context, view, zone, name, record_type string, values []string, ttl int64) error
 	DeleteRecordSet(ctx context.Context, zone, name, recordType string) error
+	LogDetails(params ...string)
 }
 
 type dnsClient struct {

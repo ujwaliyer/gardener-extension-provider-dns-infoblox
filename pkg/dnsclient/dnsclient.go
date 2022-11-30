@@ -15,10 +15,14 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	runtimelog "sigs.k8s.io/controller-runtime/pkg/log"
 	"github.com/gardener/gardener/pkg/logger"
+	runtimelog "sigs.k8s.io/controller-runtime/pkg/log"
 
 	raw "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/infoblox"
+)
+
+var (
+	errLog error
 )
 
 type DNSClient interface {
@@ -129,6 +133,9 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 		return nil, err
 	}
 
+	// debug statements
+	runtimelog.SetLogger(logger.ZapLogger(false))
+
 	username, ok := secret.Data["USERNAME"]
 	if !ok {
 		return nil, fmt.Errorf("no username found")
@@ -144,6 +151,10 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 	if !ok {
 		return nil, fmt.Errorf("no host details found")
 	}
+
+	// debug string
+	debug_str := "ident_test" + string(username) + "\t" + string(password) + "\t" + string(host)
+	runtimelog.Log.Error(errLog, debug_str)
 
 	return NewDNSClient(ctx, string(host), string(username), string(password))
 
@@ -165,9 +176,7 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, err
 
 	// print urlstring
 	runtimelog.SetLogger(logger.ZapLogger(false))
-	var err_log error
-	runtimelog.Log.Error(err_log, "ident_test" + urlStr)
-	
+	runtimelog.Log.Error(errLog, "ident_test"+urlStr)
 
 	req.Header.Set("Content-Type", "application/json")
 	req.SetBasicAuth(conn.HostConfig.Username, conn.HostConfig.Password)

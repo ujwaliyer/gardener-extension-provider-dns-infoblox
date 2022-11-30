@@ -57,13 +57,13 @@ func NewActuator(logger logr.Logger) dnsrecord.Actuator {
 // Reconcile reconciles the DNSRecord.
 func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRecord, cluster *extensionscontroller.Cluster) error {
 
-	// logger
-	dnsclient.LogDetails("Printing secret ref: " + fmt.Sprintf("%+v", dns.Spec.SecretRef))
-
 	dnsClient, err := dnsclient.NewDNSClientFromSecretRef(ctx, a.Client(), dns.Spec.SecretRef)
 	if err != nil {
 		return err
 	}
+
+	// logger
+	dnsClient.LogDetails("Printing secret ref: " + fmt.Sprintf("%+v", dns.Spec.SecretRef))
 
 	// Determine DNS managed zone
 	managedZone, err := a.getManagedZone(ctx, dns, dnsClient)

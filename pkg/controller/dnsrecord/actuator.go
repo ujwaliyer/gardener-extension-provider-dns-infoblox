@@ -157,6 +157,12 @@ func (a *actuator) getManagedZone(ctx context.Context, dns *extensionsv1alpha1.D
 		// The zone is not specified in the resource status or spec. Try to determine the zone by
 		// getting all managed zones of the account and searching for the longest zone name that is a suffix of dns.spec.Name
 		zones, err := dnsClient.GetManagedZones(ctx)
+
+		//debug for getting zones
+		for _, zone := range zones {
+			raw.LogDetails(zone)
+		}
+
 		if err != nil {
 			return "", &reconcilerutils.RequeueAfterError{
 				Cause:        fmt.Errorf("could not get DNS managed zones: %+v", err),

@@ -2,6 +2,7 @@ package infoblox
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/gardener/gardener/pkg/logger"
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
@@ -119,4 +120,14 @@ func LogDetails(params ...string) {
 		}
 	}
 
+}
+
+func NormalizeHostname(host string) string {
+	if strings.HasPrefix(host, "\\052.") {
+		host = "*" + host[4:]
+	}
+	if strings.HasSuffix(host, ".") {
+		return host[:len(host)-1]
+	}
+	return host
 }

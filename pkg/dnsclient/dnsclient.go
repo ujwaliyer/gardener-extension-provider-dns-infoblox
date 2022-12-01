@@ -89,8 +89,8 @@ func NewDNSClient(ctx context.Context, username string, password string, host st
 	// debug logger
 	raw.LogDetails(fmt.Sprintf("%+v", hostConfig))
 
-	verify := "true"
-	// verify := "false"
+	// verify := "true"
+	verify := "false"
 	if infobloxConfig.SSLVerify != nil {
 		verify = strconv.FormatBool(*infobloxConfig.SSLVerify)
 	}
@@ -202,7 +202,7 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, err
 
 	for _, zone := range rs {
 		// zone_list = append(zone_list, zone.Fqdn)
-		ZoneList[zone.Ref] = zone.Fqdn
+		ZoneList[raw.NormalizeHostname(zone.Fqdn)] = zone.Ref
 	}
 
 	return ZoneList, nil

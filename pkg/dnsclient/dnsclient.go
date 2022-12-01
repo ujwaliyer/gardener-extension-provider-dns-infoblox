@@ -156,7 +156,7 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 	}
 
 	// debug string
-	debug_str := "dnsclient_secretref" + string(username) + "\t" + string(password) + "\t" + string(host)
+	debug_str := "dnsclient_secretref " + string(username) + " " + string(password) + " " + string(host)
 	runtimelog.Log.Error(errLog, debug_str)
 
 	return NewDNSClient(ctx, string(host), string(username), string(password))
@@ -182,7 +182,7 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, err
 	runtimelog.Log.Error(errLog, "get_managed_zones "+urlStr+" "+conn.HostConfig.Username+" "+conn.HostConfig.Password)
 
 	// logger debug: using functions
-	raw.LogDetails("Get Managed Zones: func: ", urlStr, conn.HostConfig.Username, conn.HostConfig.Password)
+	// raw.LogDetails("Get Managed Zones: func: " + urlStr + " "+ conn.HostConfig.Username, conn.HostConfig.Password)
 
 	req.Header.Set("Content-Type", "application/json")
 	req.SetBasicAuth(conn.HostConfig.Username, conn.HostConfig.Password)

@@ -64,10 +64,10 @@ func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRec
 	}
 
 	// debug logger for dnsClient
-	raw.LogDetails("actuator reconcile dnsclient: " + fmt.Sprintf("%+v", dnsClient))
+	raw.LogDetails("actuator reconcile dnsclient: " + fmt.Sprintf("%+v", dnsClient.client))
 
-	// logger
-	raw.LogDetails("reconcile secret ref: " + fmt.Sprintf("%+v", dns.Spec.SecretRef))
+	// debug logger for secretref
+	// raw.LogDetails("reconcile secret ref: " + fmt.Sprintf("%+v", dns.Spec.SecretRef))
 
 	// Determine DNS managed zone
 	managedZone, err := a.getManagedZone(ctx, dns, dnsClient)
@@ -85,7 +85,7 @@ func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRec
 
 	view, ok := secret.Data["view"]
 	if !ok {
-		return fmt.Errorf("No view found")
+		return fmt.Errorf("no view found")
 	}
 	if err := dnsClient.CreateOrUpdateRecordSet(ctx, string(view), managedZone, dns.Spec.Name, string(dns.Spec.RecordType), dns.Spec.Values, ttl); err != nil {
 		return &reconcilerutils.RequeueAfterError{

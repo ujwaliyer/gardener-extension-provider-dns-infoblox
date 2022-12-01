@@ -1,9 +1,9 @@
 kind: TestDefinition
 metadata:
-  name: dnsrecord-test
+  name: dnslookup
 spec:
   owner: gardener-oq@listserv.sap.com
-  description: Integration test for dnsrecord creation, update, and deletion
+  description: Dns lookup test
   activeDeadlineSeconds: 1800
 
   command: [bash, -c]

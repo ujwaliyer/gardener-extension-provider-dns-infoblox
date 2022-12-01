@@ -159,7 +159,7 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 	debug_str := "dnsclient_secretref " + string(username) + " " + string(password) + " " + string(host)
 	runtimelog.Log.Error(errLog, debug_str)
 
-	return NewDNSClient(ctx, string(host), string(username), string(password))
+	return NewDNSClient(ctx, string(username), string(password), string(host))
 
 }
 

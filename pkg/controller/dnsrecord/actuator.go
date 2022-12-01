@@ -64,7 +64,7 @@ func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRec
 	}
 
 	// debug logger for dnsClient
-	raw.LogDetails("actuator reconcile dnsclient: " + fmt.Sprintf("%+v", dnsClient.client))
+	raw.LogDetails("actuator reconcile dnsclient: " + fmt.Sprintf("%+v", dnsClient))
 
 	// debug logger for secretref
 	// raw.LogDetails("reconcile secret ref: " + fmt.Sprintf("%+v", dns.Spec.SecretRef))

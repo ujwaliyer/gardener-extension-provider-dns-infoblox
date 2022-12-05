@@ -47,8 +47,8 @@ var _ = Describe("CreateARecord", func() {
 
 			zones, err := dnsC.GetManagedZones(nil)
 			Ω(zones).Should(ContainElement(ContainSubstring(default_zone), &zone))
-			for _, v := range zone {
-				value = v
+			for k := range zone {
+				value = k
 			}
 			Expect(err).To(BeNil())
 

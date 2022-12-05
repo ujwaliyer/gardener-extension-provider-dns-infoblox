@@ -53,7 +53,7 @@ var _ = Describe("CreateCnameRecord", func() {
 		}
 		Expect(err).To(BeNil())
 
-		err := dnsClient.CreateOrUpdateRecordSet(nil, dns_view, value, cname_record_name, "CNAME", id_addr, 30)
-		Expect(err).NotTo(BeNil())
+		err2 := dnsC.CreateOrUpdateRecordSet(nil, dns_view, value, cname_record_name, "CNAME", id_addr, 30)
+		Expect(err2).NotTo(BeNil())
 	})
 })

@@ -16,7 +16,6 @@ var _ = Describe("DeleteCnameRecord", func() {
 	const a_record_name = "example.com"
 	const txt_record_name = "abcd-efgh"
 	var cname_record_name = "txt" + "." + a_record_name
-	var id_addr = []string{"10.16.2.13"}
 	const dns_view = "default"
 
 	It("Should delete CNAME record :", func() {
@@ -53,7 +52,7 @@ var _ = Describe("DeleteCnameRecord", func() {
 		}
 		Expect(err).To(BeNil())
 
-		err := dnsClient.DeleteRecordSet(nil, value, cname_record_name, "CNAME")
-		Expect(err).NotTo(BeNil())
+		err2 := dnsC.DeleteRecordSet(nil, value, cname_record_name, "CNAME")
+		Expect(err2).NotTo(BeNil())
 	})
 })

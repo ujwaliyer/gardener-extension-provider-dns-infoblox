@@ -15,7 +15,6 @@ var _ = Describe("CreateARecord", func() {
 	var value string
 	const a_record_name = "example.com"
 	const txt_record_name = "abcd-efgh"
-	var cname_record_name = "txt" + "." + a_record_name
 	var id_addr = []string{"10.16.2.13"}
 	const dns_view = "default"
 	Context("zone ::::----", func() {
@@ -52,8 +51,8 @@ var _ = Describe("CreateARecord", func() {
 			}
 			Expect(err).To(BeNil())
 
-			err := dnsC.CreateOrUpdateRecordSet(nil, dns_view, value, a_record_name, "A", id_addr, 30)
-			Expect(err).NotTo(BeNil())
+			err2 := dnsC.CreateOrUpdateRecordSet(nil, dns_view, value, a_record_name, "A", id_addr, 30)
+			Expect(err2).NotTo(BeNil())
 		})
 	})
 })

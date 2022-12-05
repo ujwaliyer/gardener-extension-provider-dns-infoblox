@@ -14,11 +14,8 @@ var _ = Describe("GetManagedZone", func() {
 	var default_zone string
 	var user string
 	var password string
-	var value string
 	const a_record_name = "example.com"
 	const txt_record_name = "abcd-efgh"
-	var cname_record_name = "txt" + "." + a_record_name
-	var id_addr = []string{"10.16.2.13"}
 	const dns_view = "default"
 	Context("zone ::::----", func() {
 		It("Should not create A record :", func() {
@@ -49,9 +46,6 @@ var _ = Describe("GetManagedZone", func() {
 
 			zones, err := dnsC.GetManagedZones(nil)
 			Ω(zones).Should(ContainElement(ContainSubstring(default_zone), &zone))
-			for k := range zone {
-				value = k
-			}
 			Expect(err).To(BeNil())
 		})
 	})

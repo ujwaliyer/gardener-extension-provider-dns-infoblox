@@ -15,8 +15,6 @@ var _ = Describe("DeleteTxtRecord", func() {
 	var value string
 	const a_record_name = "example.com"
 	const txt_record_name = "abcd-efgh"
-	var cname_record_name = "txt" + "." + a_record_name
-	var id_addr = []string{"10.16.2.13"}
 	const dns_view = "default"
 	It("Should delete TXT record :", func() {
 		config := cfg.GetConfig()
@@ -51,7 +49,7 @@ var _ = Describe("DeleteTxtRecord", func() {
 		}
 		Expect(err).To(BeNil())
 
-		err := dnsC.DeleteRecordSet(nil, value, txt_record_name+"."+value, "TXT")
-		Expect(err).To(BeNil())
+		err2 := dnsC.DeleteRecordSet(nil, value, txt_record_name+"."+value, "TXT")
+		Expect(err2).To(BeNil())
 	})
 })

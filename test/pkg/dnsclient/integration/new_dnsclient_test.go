@@ -17,10 +17,10 @@ var _ = Describe("NewDnsclient", func() {
 	var user string
 	var password string
 	var value string
-	const a_record_name = "example.com"
-	const txt_record_name = "abcd-efgh"
-	var cname_record_name = "txt" + "." + a_record_name
-	var id_addr = []string{"10.16.2.13"}
+	const a_record_name = "example1.com"
+	const txt_record_name = "abcd-efgh1"
+	var cname_record_name = "txt1" + "." + a_record_name
+	var id_addr = []string{"10.16.2.14"}
 	const dns_view = "default"
 	BeforeEach(func() {
 		config := cfg.GetConfig()
@@ -54,8 +54,8 @@ var _ = Describe("NewDnsclient", func() {
 		It("GetManaged zone :", func() {
 			zones, err := dnsClient.GetManagedZones(nil)
 			Ω(zones).Should(ContainElement(ContainSubstring(default_zone), &zone))
-			for _, v := range zone {
-				value = v
+			for k := range zone {
+				value = k
 			}
 			Expect(err).To(BeNil())
 		})
@@ -79,7 +79,7 @@ var _ = Describe("NewDnsclient", func() {
 		})
 		It("Should delete A record :", func() {
 			err := dnsClient.DeleteRecordSet(nil, value, a_record_name, "A")
-			Expect(err).NotTo(BeNil())
+			Expect(err).To(BeNil())
 		})
 		It("Should delete CNAME record :", func() {
 			err := dnsClient.DeleteRecordSet(nil, value, cname_record_name, "CNAME")

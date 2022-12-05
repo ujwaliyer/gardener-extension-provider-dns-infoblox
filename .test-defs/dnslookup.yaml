@@ -1,15 +1,15 @@
 kind: TestDefinition
 metadata:
-  name: dnsrecord-test
+  name: dnslookup
 spec:
   owner: gardener-oq@listserv.sap.com
-  description: Integration test for dnsrecord creation, update, and deletion
+  description: Dns lookup test
   activeDeadlineSeconds: 1800
 
   command: [bash, -c]
   args:
     - >-
-      go test -timeout=25m -mod=vendor ./test/integration/dnsrecord/integration
+      go test -timeout=25m -mod=vendor ./test/integration/dnsrecord/functional
       --v -ginkgo.v -ginkgo.progress -ginkgo.no-color
       --kubeconfig=$TM_KUBECONFIG_PATH/testmachinery.config
       --username=$INFOBLOX_USERNAME

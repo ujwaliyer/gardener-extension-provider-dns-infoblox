@@ -48,7 +48,6 @@ var _ = Describe("CreateCnameRecord", func() {
 
 		zones, err := dnsC.GetManagedZones(nil)
 		Ω(zones).Should(ContainElement(ContainSubstring(default_zone), &zone))
-<<<<<<< HEAD
 		for k := range zone {
 			value = k
 		}
@@ -56,14 +55,5 @@ var _ = Describe("CreateCnameRecord", func() {
 
 		err2 := dnsC.CreateOrUpdateRecordSet(nil, dns_view, value, cname_record_name, "CNAME", id_addr, 30)
 		Expect(err2).NotTo(BeNil())
-=======
-		for _, v := range zone {
-			value = v
-		}
-		Expect(err).To(BeNil())
-
-		err := dnsClient.CreateOrUpdateRecordSet(nil, dns_view, value, cname_record_name, "CNAME", id_addr, 30)
-		Expect(err).NotTo(BeNil())
->>>>>>> c22e922 (Segrigation of Testcases and added test def)
 	})
 })

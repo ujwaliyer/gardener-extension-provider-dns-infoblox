@@ -1,3 +1,17 @@
+// Copyright (c) 2022 SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package dnsclient
 
 import (
@@ -15,14 +29,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/gardener/gardener/pkg/logger"
-	runtimelog "sigs.k8s.io/controller-runtime/pkg/log"
-
 	raw "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/infoblox"
-)
-
-var (
-	errLog error
 )
 
 type DNSClient interface {
@@ -86,10 +93,6 @@ func NewDNSClient(ctx context.Context, username string, password string, host st
 		Password: password,
 	}
 
-	// debug logger
-	raw.LogDetails(fmt.Sprintf("%+v", hostConfig))
-
-	// verify := "true"
 	verify := "false"
 	if infobloxConfig.SSLVerify != nil {
 		verify = strconv.FormatBool(*infobloxConfig.SSLVerify)
@@ -136,9 +139,6 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 		return nil, err
 	}
 
-	// debug statements
-	runtimelog.SetLogger(logger.ZapLogger(false))
-
 	username, ok := secret.Data["USERNAME"]
 	if !ok {
 		return nil, fmt.Errorf("no username found")
@@ -154,10 +154,6 @@ func NewDNSClientFromSecretRef(ctx context.Context, c client.Client, secretRef c
 	if !ok {
 		return nil, fmt.Errorf("no host details found")
 	}
-
-	// debug string
-	debug_str := "dnsclient_secretref " + string(username) + " " + string(password) + " " + string(host)
-	runtimelog.Log.Error(errLog, debug_str)
 
 	return NewDNSClient(ctx, string(username), string(password), string(host))
 
@@ -177,13 +173,6 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, err
 		fmt.Println(err)
 	}
 
-	// debug: print urlstring
-	runtimelog.SetLogger(logger.ZapLogger(false))
-	runtimelog.Log.Error(errLog, "get_managed_zones "+urlStr+" "+conn.HostConfig.Username+" "+conn.HostConfig.Password)
-
-	// logger debug: using functions
-	// raw.LogDetails("Get Managed Zones: func: " + urlStr + " "+ conn.HostConfig.Username, conn.HostConfig.Password)
-
 	req.Header.Set("Content-Type", "application/json")
 	req.SetBasicAuth(conn.HostConfig.Username, conn.HostConfig.Password)
 
@@ -201,7 +190,6 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, err
 	ZoneList := make(map[string]string)
 
 	for _, zone := range rs {
-		// zone_list = append(zone_list, zone.Fqdn)
 		ZoneList[raw.NormalizeHostname(zone.Fqdn)] = zone.Ref
 	}
 

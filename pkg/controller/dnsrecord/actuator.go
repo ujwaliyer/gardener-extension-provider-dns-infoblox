@@ -1,4 +1,4 @@
-// Copyright (c) 2021 SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// Copyright (c) 2022 SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import (
 	"time"
 
 	dnsclient "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/dnsclient"
-	raw "github.com/ujwaliyer/gardener-extension-provider-dns-infoblox/pkg/infoblox"
 
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	"github.com/gardener/gardener/extensions/pkg/controller/common"
@@ -32,7 +31,6 @@ import (
 	kutil "github.com/gardener/gardener/pkg/utils/kubernetes"
 	"github.com/go-logr/logr"
 
-	// corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -62,12 +60,6 @@ func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRec
 	if err != nil {
 		return err
 	}
-
-	// debug logger for dnsClient
-	raw.LogDetails("actuator reconcile dnsclient: " + fmt.Sprintf("%+v", dnsClient))
-
-	// debug logger for secretref
-	// raw.LogDetails("reconcile secret ref: " + fmt.Sprintf("%+v", dns.Spec.SecretRef))
 
 	// Determine DNS managed zone
 	managedZone, err := a.getManagedZone(ctx, dns, dnsClient)
@@ -158,11 +150,6 @@ func (a *actuator) getManagedZone(ctx context.Context, dns *extensionsv1alpha1.D
 		// getting all managed zones of the account and searching for the longest zone name that is a suffix of dns.spec.Name
 		zones, err := dnsClient.GetManagedZones(ctx)
 
-		//debug for getting zones
-		for _, zone := range zones {
-			raw.LogDetails(zone)
-		}
-
 		if err != nil {
 			return "", &reconcilerutils.RequeueAfterError{
 				Cause:        fmt.Errorf("could not get DNS managed zones: %+v", err),
@@ -177,25 +164,3 @@ func (a *actuator) getManagedZone(ctx context.Context, dns *extensionsv1alpha1.D
 		return zone, nil
 	}
 }
-
-/*
-func lookupHosts(hostname string) ([]string, []string, error) {
-	ips, err := net.LookupIP(hostname)
-	if err != nil {
-		return nil, nil, err
-	}
-	ipv4addrs := make([]string, 0, len(ips))
-	ipv6addrs := make([]string, 0, len(ips))
-	for _, ip := range ips {
-		if ip.To4() != nil {
-			ipv4addrs = append(ipv4addrs, ip.String())
-		} else if ip.To16() != nil {
-			ipv6addrs = append(ipv6addrs, ip.String())
-		}
-	}
-	if len(ipv4addrs) == 0 && len(ipv6addrs) == 0 {
-		return nil, nil, fmt.Errorf("%s has no IPv4/IPv6 address (of %d addresses)", hostname, len(ips))
-	}
-	return ipv4addrs, ipv6addrs, nil
-}
-*/
